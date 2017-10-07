@@ -1,8 +1,5 @@
 import { EOL } from "os";
-import {
-    Logger,
-    LoggerInstance,
-} from "winston";
+import { Logger } from "winston";
 
 import { ICliDecoratorOptions } from "./interfaces";
 
