@@ -31,18 +31,24 @@ const ClassLoader = proxyquire("../src/lib/ClassLoader", {
 }).ClassLoader;
 
 describe("ClassLoader", (): void => {
-    let createClassStub: sinon.SinonStub;
     let loadClassStub: sinon.SinonStub;
     let classLoader: any;
 
+    const fileToLoad = "/path/to/file.ts";
+
     beforeEach((): void => {
-        createClassStub = sinon.stub(ClassLoader.prototype as any, "createClass");
-        loadClassStub = sinon.stub(ClassLoader.prototype as any, "validateFiles");
-        classLoader = new ClassLoader({} as any);
+        loadClassStub = sinon.stub(ClassLoader.prototype as any, "loadClass");
+        classLoader = new ClassLoader(fileToLoad, {} as any);
+    });
+
+    describe("constructor", (): void => {
+        it("should load the given filename", (): void => {
+            loadClassStub.should.have.been.calledOnce;
+            loadClassStub.should.have.been.calledWithExactly(fileToLoad);
+        });
     });
 
     afterEach((): void => {
-        createClassStub.restore();
         loadClassStub.restore();
     });
 
