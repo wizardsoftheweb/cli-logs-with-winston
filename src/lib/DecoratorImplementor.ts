@@ -1,28 +1,63 @@
 import { InheritsCliDecoratorOptions } from "./InheritsCliDecoratorOptions";
 import { ICliDecoratorOptions } from "./interfaces";
 
+/**
+ * Adds `implements LogsWithWinston` and the interface implementation to each
+ * class found in the given contents.
+ *
+ * @class DecoratorImplementor
+ * @extends InheritsCliDecoratorOptions
+ */
 export class DecoratorImplementor extends InheritsCliDecoratorOptions {
     /* tslint:disable-next-line:max-line-length */
+    /** @type {RegExp} Class declaration regex */
     public static DECLARATION_REGEXP = /^((?:export)?\s*class\s+(?:\w+)(?:\s+extends\s+(?:[\w ,]))?(?:\s+implements\s+([\w ,]))?)(\s+\{)?$/gi;
     public contents: string;
 
+    /**
+     * Decorates all the classes in the passed-in contents.
+     *
+     * @param {string}               contents
+     * The file contents to decorate
+     * @param {ICliDecoratorOptions} options
+     * The options to use
+     */
     public constructor(contents: string, options: ICliDecoratorOptions) {
         super(options);
         this.contents = this.decorate(contents);
     }
 
+    /**
+     * Determine how `winston` is being used in the file.
+     *
+     * @param  {string} contents
+     * File contents to parse
+     * @return {string}
+     * The string to use as the type `LoggerInstance`
+     */
     private determineWinstonUsage(contents: string): string {
         /* tslint:disable-next-line:max-line-length */
         const importRegExp = /^\s*import\s*(?:\{[\s\S]*?(?:LoggerInstance(?:\s+as\s+(\w*))?)[\s\S]*?\}|\* as (\w+))\s*from "winston";$/gmi;
         const match: any = importRegExp.exec(contents);
         if (typeof match[2] === "string") {
+            this.options.logger.silly(`Matched 'import * as ${match[2]} from "winston";'`);
             return `${match[2]}.LoggerInstance`;
         } else if (typeof match[1] === "string") {
+            this.options.logger.silly(`Matched 'import { ...LoggerInstance as ${match[1]}... } from "winston";'`);
             return match[1];
         }
+        this.options.logger.silly(`Matched 'import { ...LoggerInstance... } from "winston";'`);
         return "LoggerInstance";
     }
 
+    /**
+     * Creates the code containing comments and implementation.
+     *
+     * @param  {string} loggerInstance
+     * The string to use as the type `LoggerInstance`
+     * @return {string}
+     * Code ready to be inserted
+     */
     private generateMembers(loggerInstance: string): string {
         return `
 /* Begin LogsWithWinston copypasta */
@@ -36,6 +71,14 @@ whoamiWinston: string;
             + this.options.eol;
     }
 
+    /**
+     * Appends `(implements )?,? LogsWithWinston` to the class declaration
+     *
+     * @param  {string[]} match
+     * The found class declaration
+     * @return {string}
+     * The new declaration with `LogsWithWinston`
+     */
     private appendImplements(match: string[]): string {
         if (typeof match[2] !== "undefined") {
             return match[0].replace(match[2], `${match[2]}, LogsWithWinston`);
@@ -43,6 +86,15 @@ whoamiWinston: string;
         return `${match[1]} implements LogsWithWinston ${match[3]}`;
     }
 
+    /**
+     * Decorates every class declaration found by a properly decorated class
+     * implementing `LogsWithWinston`.
+     *
+     * @param  {string} contents
+     * The file to modify
+     * @return {string}
+     * The decorated contents
+     */
     private decorate(contents: string): string {
         let output = contents;
         const loggerInstance = this.determineWinstonUsage(contents);
@@ -51,7 +103,10 @@ whoamiWinston: string;
         while (match = DecoratorImplementor.DECLARATION_REGEXP.exec(contents)) {
             output = output.replace(
                 match[0],
-                this.appendImplements(match) + this.generateMembers(loggerInstance),
+                this.options.decorator
+                + this.options.eol
+                + this.appendImplements(match)
+                + this.generateMembers(loggerInstance),
             );
         }
         return contents;
