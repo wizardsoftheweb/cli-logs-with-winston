@@ -20,11 +20,11 @@ const WinstonImportValidator = proxyquire("../src/lib/WinstonImportValidator", {
 
 describe("WinstonImportValidator", (): void => {
     let checkWinstonImportStub: sinon.SinonStub;
-    let resolver: any;
+    let winstonImportValidator: any;
 
     beforeEach((): void => {
         checkWinstonImportStub = sinon.stub(WinstonImportValidator.prototype as any, "checkWinstonImport");
-        resolver = new WinstonImportValidator({} as any);
+        winstonImportValidator = new WinstonImportValidator({} as any);
     });
 
     afterEach((): void => {

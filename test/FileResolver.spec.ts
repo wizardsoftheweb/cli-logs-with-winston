@@ -13,40 +13,40 @@ import { InheritsCliDecoratorOptions } from "../src/lib/InheritsCliDecoratorOpti
 const should = chai.should();
 chai.use(sinonChai);
 
-const isAbsoluteStub = sinon.stub();
-const resolveStub = sinon.stub();
-const joinStub = sinon.stub();
+const isAbsolute = sinon.stub();
+const resolve = sinon.stub();
+const join = sinon.stub();
 const FileResolver = proxyquire("../src/lib/FileResolver", {
     /* tslint:disable-next-line:object-literal-key-quotes */
     "path": {
         "@noCallThru": true,
-        isAbsolute: isAbsoluteStub,
-        join: joinStub,
-        resolve: resolveStub,
+        isAbsolute,
+        join,
+        resolve,
         sep: "/",
     },
 }).FileResolver;
 
 describe("FileResolver", (): void => {
-    let parseStub: sinon.SinonStub;
-    let validateStub: sinon.SinonStub;
+    let parseArgvStub: sinon.SinonStub;
+    let validateFilesStub: sinon.SinonStub;
     let resolveFilesStub: sinon.SinonStub;
-    let resolver: any;
+    let fileResolver: any;
 
     beforeEach((): void => {
-        parseStub = sinon.stub(FileResolver.prototype as any, "parseArgv");
-        validateStub = sinon.stub(FileResolver.prototype as any, "validateFiles");
+        parseArgvStub = sinon.stub(FileResolver.prototype as any, "parseArgv");
+        validateFilesStub = sinon.stub(FileResolver.prototype as any, "validateFiles");
         resolveFilesStub = sinon.stub(FileResolver.prototype as any, "resolveFiles");
-        resolver = new FileResolver({} as any);
+        fileResolver = new FileResolver({} as any);
     });
 
     describe("constructor", (): void => {
         it("should resolve the parsed and validated files", (): void => {
-            parseStub.should.be.calledOnce;
-            validateStub.should.be.calledOnce;
-            validateStub.should.be.calledAfter(parseStub);
+            parseArgvStub.should.be.calledOnce;
+            validateFilesStub.should.be.calledOnce;
+            validateFilesStub.should.be.calledAfter(parseArgvStub);
             resolveFilesStub.should.be.calledOnce;
-            resolveFilesStub.should.be.calledAfter(validateStub);
+            resolveFilesStub.should.be.calledAfter(validateFilesStub);
         });
     });
 
@@ -60,14 +60,14 @@ describe("FileResolver", (): void => {
         let files: string[];
 
         beforeEach((): void => {
-            parseStub.restore();
+            parseArgvStub.restore();
             process.argv = [
                 "/path/to/node",
                 "/path/to/script",
                 "arg1",
                 "arg2",
             ];
-            files = (resolver as any).parseArgv();
+            files = (fileResolver as any).parseArgv();
         });
 
         it("should strip node and calling script from argv", (): void => {
@@ -86,17 +86,17 @@ describe("FileResolver", (): void => {
 
     describe("validateFiles", (): void => {
         beforeEach((): void => {
-            validateStub.restore();
+            validateFilesStub.restore();
         });
 
         it("should throw if no input found", (): void => {
-            (resolver as any).validateFiles.bind(resolver, [])
+            (fileResolver as any).validateFiles.bind(fileResolver, [])
                 .should.throw(FileResolver.ERROR_NO_INPUT);
         });
 
         it("should do nothing if input is found", (): void => {
             // Binding valid input isn't enough to check the else branch
-            (resolver as any).validateFiles(["one", "two"]);
+            (fileResolver as any).validateFiles(["one", "two"]);
             // If the above doesn't throw, it's properly validated
             true.should.be.true;
         });
@@ -124,7 +124,7 @@ describe("FileResolver", (): void => {
         beforeEach((): void => {
             resetPath();
             resolveFilesStub.restore();
-            files = (resolver as any).resolveFiles([
+            files = (fileResolver as any).resolveFiles([
                 "../relative/path",
                 "path/with.ext",
                 "/absolute/path",
@@ -132,9 +132,9 @@ describe("FileResolver", (): void => {
         });
 
         it("should append the proper extension", (): void => {
-            isAbsoluteStub.should.have.been.calledThrice;
+            isAbsolute.should.have.been.calledThrice;
             for (const iteration of [0, 1, 2]) {
-                const call = isAbsoluteStub.getCall(iteration);
+                const call = isAbsolute.getCall(iteration);
                 call.args.should.be.an("array");
                 const args = call.args;
                 extensionRegExp.test(args[0]).should.be.true;
@@ -142,13 +142,13 @@ describe("FileResolver", (): void => {
         });
 
         it("should check if each path is absolute", (): void => {
-            isAbsoluteStub.should.have.been.calledThrice;
+            isAbsolute.should.have.been.calledThrice;
         });
 
         it("should join cwd only when a relative path is found", (): void => {
-            joinStub.should.have.been.calledTwice;
+            join.should.have.been.calledTwice;
             for (const iteration of [0, 1]) {
-                const call = joinStub.getCall(iteration);
+                const call = join.getCall(iteration);
                 call.args.should.be.an("array");
                 const args = call.args;
                 args[1].should.deep.equal(joinInput[iteration]);
@@ -156,7 +156,7 @@ describe("FileResolver", (): void => {
         });
 
         it("should resolve each path", (): void => {
-            resolveStub.should.have.been.calledThrice;
+            resolve.should.have.been.calledThrice;
         });
 
         after((): void => {
@@ -165,22 +165,22 @@ describe("FileResolver", (): void => {
     });
 
     afterEach((): void => {
-        parseStub.restore();
-        validateStub.restore();
+        parseArgvStub.restore();
+        validateFilesStub.restore();
         resolveFilesStub.restore();
     });
 
     function resetPath(): void {
-        isAbsoluteStub.reset();
-        joinStub.reset();
-        resolveStub.reset();
-        isAbsoluteStub.callsFake((input: string) => {
+        isAbsolute.reset();
+        join.reset();
+        resolve.reset();
+        isAbsolute.callsFake((input: string) => {
             return /^\//.test(input);
         });
-        resolveStub.callsFake((input: string) => {
+        resolve.callsFake((input: string) => {
             return input;
         });
-        joinStub.callsFake((...args: string[]) => {
+        join.callsFake((...args: string[]) => {
             return args.join("/");
         });
     }

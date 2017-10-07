@@ -24,10 +24,10 @@ const InheritsCliDecoratorOptions = proxyquire("../src/lib/InheritsCliDecoratorO
 }).InheritsCliDecoratorOptions;
 
 describe("InheritsCliDecoratorOptions", (): void => {
-    let resolver: any;
+    let inheritsCliDecoratorOptionsInstance: any;
 
     beforeEach((): void => {
-        resolver = new InheritsCliDecoratorOptions({} as any);
+        inheritsCliDecoratorOptionsInstance = new InheritsCliDecoratorOptions({} as any);
     });
 
     function resetWinston(): void {

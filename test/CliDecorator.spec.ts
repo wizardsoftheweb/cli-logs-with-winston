@@ -45,11 +45,11 @@ const CliDecorator = proxyquire("../src/lib/CliDecorator", {
 
 describe("CliDecorator", (): void => {
     let decorateStub: sinon.SinonStub;
-    let resolver: any;
+    let cliDecorator: any;
 
     beforeEach((): void => {
         decorateStub = sinon.stub(CliDecorator.prototype as any, "decorate");
-        resolver = new CliDecorator({} as any);
+        cliDecorator = new CliDecorator({} as any);
     });
 
     afterEach((): void => {

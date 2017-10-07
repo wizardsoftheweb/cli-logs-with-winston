@@ -33,12 +33,12 @@ const ClassLoader = proxyquire("../src/lib/ClassLoader", {
 describe("ClassLoader", (): void => {
     let createClassStub: sinon.SinonStub;
     let loadClassStub: sinon.SinonStub;
-    let resolver: any;
+    let classLoader: any;
 
     beforeEach((): void => {
         createClassStub = sinon.stub(ClassLoader.prototype as any, "createClass");
         loadClassStub = sinon.stub(ClassLoader.prototype as any, "validateFiles");
-        resolver = new ClassLoader({} as any);
+        classLoader = new ClassLoader({} as any);
     });
 
     afterEach((): void => {

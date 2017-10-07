@@ -17,11 +17,11 @@ const DecoratorImplementor = proxyquire("../src/lib/DecoratorImplementor", {}).D
 
 describe("DecoratorImplementor", (): void => {
     let decorateStub: sinon.SinonStub;
-    let resolver: any;
+    let decoratorImplementor: any;
 
     beforeEach((): void => {
         decorateStub = sinon.stub(DecoratorImplementor.prototype as any, "decorate");
-        resolver = new DecoratorImplementor({} as any);
+        decoratorImplementor = new DecoratorImplementor({} as any);
     });
 
     afterEach((): void => {
