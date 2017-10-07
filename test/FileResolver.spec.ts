@@ -8,17 +8,19 @@ import * as proxyquire from "proxyquire";
 import * as sinon from "sinon";
 import * as sinonChai from "sinon-chai";
 
+import { InheritsCliDecoratorOptions } from "../src/lib/InheritsCliDecoratorOptions";
+
 const should = chai.should();
 chai.use(sinonChai);
 
+const isAbsoluteStub = sinon.stub();
 const resolveStub = sinon.stub();
 const joinStub = sinon.stub();
-const basenameStub = sinon.stub();
 const FileResolver = proxyquire("../src/lib/FileResolver", {
     /* tslint:disable-next-line:object-literal-key-quotes */
     "path": {
         "@noCallThru": true,
-        basename: basenameStub,
+        isAbsolute: isAbsoluteStub,
         join: joinStub,
         resolve: resolveStub,
         sep: "/",
@@ -101,7 +103,65 @@ describe("FileResolver", (): void => {
     });
 
     describe("resolveFiles", (): void => {
+        let cwd: any;
 
+        const extensionRegExp = new RegExp(InheritsCliDecoratorOptions.DEFAULT_EXTENSION + "$");
+
+        before((): void => {
+            cwd = process.cwd();
+            process.cwd = (): string => {
+                return "/current/directory";
+            };
+        });
+
+        let files: string[];
+
+        const joinInput = [
+            "../relative/path.ts",
+            "path/with.ts",
+        ];
+
+        beforeEach((): void => {
+            resetPath();
+            resolveFilesStub.restore();
+            files = (resolver as any).resolveFiles([
+                "../relative/path",
+                "path/with.ext",
+                "/absolute/path",
+            ]);
+        });
+
+        it("should append the proper extension", (): void => {
+            isAbsoluteStub.should.have.been.calledThrice;
+            for (const iteration of [0, 1, 2]) {
+                const call = isAbsoluteStub.getCall(iteration);
+                call.args.should.be.an("array");
+                const args = call.args;
+                extensionRegExp.test(args[0]).should.be.true;
+            }
+        });
+
+        it("should check if each path is absolute", (): void => {
+            isAbsoluteStub.should.have.been.calledThrice;
+        });
+
+        it("should join cwd only when a relative path is found", (): void => {
+            joinStub.should.have.been.calledTwice;
+            for (const iteration of [0, 1]) {
+                const call = joinStub.getCall(iteration);
+                call.args.should.be.an("array");
+                const args = call.args;
+                args[1].should.deep.equal(joinInput[iteration]);
+            }
+        });
+
+        it("should resolve each path", (): void => {
+            resolveStub.should.have.been.calledThrice;
+        });
+
+        after((): void => {
+            process.cwd = cwd;
+        });
     });
 
     afterEach((): void => {
@@ -109,4 +169,19 @@ describe("FileResolver", (): void => {
         validateStub.restore();
         resolveFilesStub.restore();
     });
+
+    function resetPath(): void {
+        isAbsoluteStub.reset();
+        joinStub.reset();
+        resolveStub.reset();
+        isAbsoluteStub.callsFake((input: string) => {
+            return /^\//.test(input);
+        });
+        resolveStub.callsFake((input: string) => {
+            return input;
+        });
+        joinStub.callsFake((...args: string[]) => {
+            return args.join("/");
+        });
+    }
 });
