@@ -61,6 +61,16 @@ export class FileResolver extends InheritsCliDecoratorOptions {
         this.options.logger.silly(`Detected ${files.length} files`);
     }
 
+    /**
+     * Strips extensions from filenames, appends the desired extension,
+     * joins with `process.cwd()` for an absolute path, and resolves the result
+     * to make a pretty path.
+     *
+     * @param  {string[]} files
+     * An array of file inputs to create absolute paths for
+     * @return {string[]}
+     * An array of absolute paths to the input
+     */
     private resolveFiles(files: string[]): string[] {
         return files.map((filename: string) => {
             this.options.logger.silly(`Given ${filename}`);
