@@ -71,6 +71,39 @@ export class file {${EOL}\
         });
     });
 
+    describe("loadClass", (): void => {
+        let createClassStub: sinon.SinonStub;
+
+        const dummyLoadContents = "loadqqq";
+        const dummyCreateContents = "createqqq";
+
+        beforeEach((): void => {
+            resetFs();
+            loadClassStub.restore();
+            createClassStub = sinon.stub(classLoader as any, "createClass")
+                .returns(dummyCreateContents);
+        });
+
+        it("should load classes with existing files", (): void => {
+            readFileSync.returns(dummyLoadContents);
+            const contents = (classLoader as any).loadClass(fileToLoad);
+            readFileSync.should.have.been.calledOnce;
+            readFileSync.should.have.been.calledWithExactly(fileToLoad, "utf-8");
+            createClassStub.should.not.have.been.called;
+            contents.should.equal(dummyLoadContents);
+        });
+
+        it("should create classes without files", (): void => {
+            readFileSync.throws();
+            const contents = (classLoader as any).loadClass(fileToLoad);
+            readFileSync.should.have.been.calledOnce;
+            readFileSync.should.have.been.calledWithExactly(fileToLoad, "utf-8");
+            createClassStub.should.have.been.calledOnce;
+            createClassStub.should.have.been.calledWithExactly(fileToLoad);
+            contents.should.equal(dummyCreateContents);
+        });
+    });
+
     afterEach((): void => {
         loadClassStub.restore();
     });
