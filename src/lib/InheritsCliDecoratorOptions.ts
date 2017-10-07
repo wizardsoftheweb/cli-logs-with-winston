@@ -11,6 +11,8 @@ import { ICliDecoratorOptions } from "./interfaces";
  * @class InheritsCliDecoratorOptions
  */
 export abstract class InheritsCliDecoratorOptions {
+    /** @type {String} Default decorator to apply is an empty one */
+    public static DEFAULT_DECORATOR = "@LogsWithWinston()";
     /**
      * Default `EOL` is `os.EOL`
      *
@@ -46,6 +48,7 @@ export abstract class InheritsCliDecoratorOptions {
      */
     public constructor(args: ICliDecoratorOptions | any) {
         this.options = {} as any;
+        this.options.decorator = args.decorator || InheritsCliDecoratorOptions.DEFAULT_DECORATOR;
         this.options.eol = args.eol || InheritsCliDecoratorOptions.DEFAULT_EOL;
         this.options.extension = args.extension || InheritsCliDecoratorOptions.DEFAULT_EXTENSION;
         this.options.indent = args.indent || InheritsCliDecoratorOptions.DEFAULT_INDENT;
