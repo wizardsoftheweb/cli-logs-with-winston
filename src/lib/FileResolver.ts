@@ -1,26 +1,31 @@
 import {
-    readFileSync,
-    writeFileSync,
-} from "fs";
-import { EOL } from "os";
-import {
     basename,
     join,
     resolve,
 } from "path";
-import {
-    Logger,
-    LoggerInstance,
-} from "winston";
 
 import { InheritsCliDecoratorOptions } from "./InheritsCliDecoratorOptions";
 import { ICliDecoratorOptions } from "./interfaces";
 
+/**
+ * This class checks `process.argv` for a list of files and resolves their
+ * absolute file path.
+ *
+ * @class FileResolver
+ */
 export class FileResolver extends InheritsCliDecoratorOptions {
+    /** @type {String} Error message for null input */
     public static ERROR_NO_INPUT = "Must specify at least one file";
 
+    /** @type {string[]} An array of resolved absolute file names */
     public files: string[];
 
+    /**
+     * Applies passed-in options and validates `process.argv` input
+     *
+     * @param {ICliDecoratorOptions} options
+     * The options to use
+     */
     public constructor(options: ICliDecoratorOptions) {
         super(options);
         const files = this.parseArgv();
