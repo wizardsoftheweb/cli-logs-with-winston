@@ -2,12 +2,7 @@ import {
     readFileSync,
     writeFileSync,
 } from "fs";
-import { EOL } from "os";
-import {
-    basename,
-    join,
-    resolve,
-} from "path";
+import { basename } from "path";
 
 import { InheritsCliDecoratorOptions } from "./InheritsCliDecoratorOptions";
 import { ICliDecoratorOptions } from "./interfaces";
