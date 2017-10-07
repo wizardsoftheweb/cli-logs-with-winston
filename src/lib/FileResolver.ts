@@ -33,6 +33,14 @@ export class FileResolver extends InheritsCliDecoratorOptions {
         this.files = this.resolveFiles(files);
     }
 
+    /**
+     * Returns everything from `process.argv` after `node` and the calling
+     * script. The assumption is that everything after the script will be either
+     * a filename or class name (whose file should be created)
+     *
+     * @return {string[]}
+     * An array of file inputs
+     */
     private parseArgv(): string[] {
         return process.argv.slice(2);
     }

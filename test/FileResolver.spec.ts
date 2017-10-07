@@ -35,6 +35,40 @@ describe("FileResolver", (): void => {
         });
     });
 
+    describe("parseArgv", (): void => {
+        let savedArgv: string[];
+
+        before((): void => {
+            savedArgv = process.argv;
+        });
+
+        let files: string[];
+
+        beforeEach((): void => {
+            parseStub.restore();
+            process.argv = [
+                "/path/to/node",
+                "/path/to/script",
+                "arg1",
+                "arg2",
+            ];
+            files = (resolver as any).parseArgv();
+        });
+
+        it("should strip node and calling script from argv", (): void => {
+            files.indexOf(process.argv[0]).should.equal(-1);
+            files.indexOf(process.argv[1]).should.equal(-1);
+        });
+
+        it("should pass on the remaining input", (): void => {
+            files.should.deep.equal(process.argv.slice(2));
+        });
+
+        after((): void => {
+            process.argv = savedArgv;
+        });
+    });
+
     afterEach((): void => {
         parseStub.restore();
         validateStub.restore();
