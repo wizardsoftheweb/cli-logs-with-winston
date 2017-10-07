@@ -74,7 +74,7 @@ export class FileResolver extends InheritsCliDecoratorOptions {
     private resolveFiles(files: string[]): string[] {
         return files.map((filename: string) => {
             this.options.logger.silly(`Given ${filename}`);
-            const relativeFilename = filename.replace(/(\.\w+)?$/g, this.options.extension);
+            const relativeFilename = filename.replace(/(\.\w+)?$/, this.options.extension);
             this.options.logger.silly(`Set extension (${relativeFilename})`);
             const absolutePath = isAbsolute(relativeFilename)
                 ? relativeFilename
