@@ -1,5 +1,5 @@
 import {
-    basename,
+    isAbsolute,
     join,
     resolve,
 } from "path";
@@ -66,9 +66,11 @@ export class FileResolver extends InheritsCliDecoratorOptions {
             this.options.logger.silly(`Given ${filename}`);
             const relativeFilename = filename.replace(/(\.\w+)?$/g, this.options.extension);
             this.options.logger.silly(`Set extension (${relativeFilename})`);
-            const joinedPath = join(process.cwd(), relativeFilename);
-            this.options.logger.silly(`Joined process.cwd() (${joinedPath})`);
-            const resolvedFilename = resolve(joinedPath);
+            const absolutePath = isAbsolute(relativeFilename)
+                ? relativeFilename
+                : join(process.cwd(), relativeFilename);
+            this.options.logger.silly(`Found absolute path (${absolutePath})`);
+            const resolvedFilename = resolve(absolutePath);
             this.options.logger.verbose(`Resolved ${resolvedFilename}`);
             return resolvedFilename;
         });
