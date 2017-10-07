@@ -4,14 +4,15 @@
 import * as chai from "chai";
 // Needed for describe, it, etc.
 import { } from "mocha";
+import { EOL } from "os";
 import * as proxyquire from "proxyquire";
 import * as sinon from "sinon";
 import * as sinonChai from "sinon-chai";
 
-import { InheritsCliDecoratorOptions } from "../src/lib/InheritsCliDecoratorOptions";
-
 const should = chai.should();
 chai.use(sinonChai);
+
+import { InheritsCliDecoratorOptions } from "../src/lib/InheritsCliDecoratorOptions";
 
 const basename = sinon.stub();
 const readFileSync = sinon.stub();
@@ -48,6 +49,28 @@ describe("ClassLoader", (): void => {
         });
     });
 
+    describe("createClass", (): void => {
+        const defaultFile = `\
+export class file {${EOL}\
+    // fill out later${EOL}\
+}${EOL}`;
+
+        beforeEach((): void => {
+            resetFs();
+            resetPath();
+        });
+
+        it("should write the file to disk", (): void => {
+            (classLoader as any).createClass(fileToLoad);
+            writeFileSync.should.have.been.calledOnce;
+            writeFileSync.should.have.been.calledWithExactly(
+                fileToLoad,
+                defaultFile,
+                "utf-8",
+            );
+        });
+    });
+
     afterEach((): void => {
         loadClassStub.restore();
     });
@@ -60,7 +83,7 @@ describe("ClassLoader", (): void => {
     function resetPath(): void {
         basename.reset();
         basename.callsFake((input: string) => {
-            return input.replace(/\.\w+$/i, "");
+            return input.replace(/^.*?(\w+)(\.\w+)?$/, "$1");
         });
     }
 });
