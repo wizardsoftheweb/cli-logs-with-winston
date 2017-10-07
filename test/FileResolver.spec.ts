@@ -4,24 +4,37 @@
 import * as chai from "chai";
 // Needed for describe, it, etc.
 import { } from "mocha";
+import * as proxyquire from "proxyquire";
 import * as sinon from "sinon";
 import * as sinonChai from "sinon-chai";
 
 const should = chai.should();
 chai.use(sinonChai);
 
-import { FileResolver } from "../src/lib/FileResolver";
+const resolveStub = sinon.stub();
+const joinStub = sinon.stub();
+const basenameStub = sinon.stub();
+const FileResolver = proxyquire("../src/lib/FileResolver", {
+    /* tslint:disable-next-line:object-literal-key-quotes */
+    "path": {
+        "@noCallThru": true,
+        basename: basenameStub,
+        join: joinStub,
+        resolve: resolveStub,
+        sep: "/",
+    },
+}).FileResolver;
 
 describe("FileResolver", (): void => {
     let parseStub: sinon.SinonStub;
     let validateStub: sinon.SinonStub;
-    let resolveStub: sinon.SinonStub;
-    let resolver: FileResolver;
+    let resolveFilesStub: sinon.SinonStub;
+    let resolver: any;
 
     beforeEach((): void => {
         parseStub = sinon.stub(FileResolver.prototype as any, "parseArgv");
         validateStub = sinon.stub(FileResolver.prototype as any, "validateFiles");
-        resolveStub = sinon.stub(FileResolver.prototype as any, "resolveFiles");
+        resolveFilesStub = sinon.stub(FileResolver.prototype as any, "resolveFiles");
         resolver = new FileResolver({} as any);
     });
 
@@ -30,8 +43,8 @@ describe("FileResolver", (): void => {
             parseStub.should.be.calledOnce;
             validateStub.should.be.calledOnce;
             validateStub.should.be.calledAfter(parseStub);
-            resolveStub.should.be.calledOnce;
-            resolveStub.should.be.calledAfter(validateStub);
+            resolveFilesStub.should.be.calledOnce;
+            resolveFilesStub.should.be.calledAfter(validateStub);
         });
     });
 
@@ -87,9 +100,13 @@ describe("FileResolver", (): void => {
         });
     });
 
+    describe("resolveFiles", (): void => {
+
+    });
+
     afterEach((): void => {
         parseStub.restore();
         validateStub.restore();
-        resolveStub.restore();
+        resolveFilesStub.restore();
     });
 });
