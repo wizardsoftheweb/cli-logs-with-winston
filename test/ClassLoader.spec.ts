@@ -4,14 +4,15 @@
 import * as chai from "chai";
 // Needed for describe, it, etc.
 import { } from "mocha";
+import { EOL } from "os";
 import * as proxyquire from "proxyquire";
 import * as sinon from "sinon";
 import * as sinonChai from "sinon-chai";
 
-import { InheritsCliDecoratorOptions } from "../src/lib/InheritsCliDecoratorOptions";
-
 const should = chai.should();
 chai.use(sinonChai);
+
+import { InheritsCliDecoratorOptions } from "../src/lib/InheritsCliDecoratorOptions";
 
 const basename = sinon.stub();
 const readFileSync = sinon.stub();
@@ -31,18 +32,79 @@ const ClassLoader = proxyquire("../src/lib/ClassLoader", {
 }).ClassLoader;
 
 describe("ClassLoader", (): void => {
-    let createClassStub: sinon.SinonStub;
     let loadClassStub: sinon.SinonStub;
     let classLoader: any;
 
+    const fileToLoad = "/path/to/file.ts";
+
     beforeEach((): void => {
-        createClassStub = sinon.stub(ClassLoader.prototype as any, "createClass");
-        loadClassStub = sinon.stub(ClassLoader.prototype as any, "validateFiles");
-        classLoader = new ClassLoader({} as any);
+        loadClassStub = sinon.stub(ClassLoader.prototype as any, "loadClass");
+        classLoader = new ClassLoader(fileToLoad, {} as any);
+    });
+
+    describe("constructor", (): void => {
+        it("should load the given filename", (): void => {
+            loadClassStub.should.have.been.calledOnce;
+            loadClassStub.should.have.been.calledWithExactly(fileToLoad);
+        });
+    });
+
+    describe("createClass", (): void => {
+        const defaultFile = `\
+export class file {${EOL}\
+    // fill out later${EOL}\
+}${EOL}`;
+
+        beforeEach((): void => {
+            resetFs();
+            resetPath();
+        });
+
+        it("should write the file to disk", (): void => {
+            (classLoader as any).createClass(fileToLoad);
+            writeFileSync.should.have.been.calledOnce;
+            writeFileSync.should.have.been.calledWithExactly(
+                fileToLoad,
+                defaultFile,
+                "utf-8",
+            );
+        });
+    });
+
+    describe("loadClass", (): void => {
+        let createClassStub: sinon.SinonStub;
+
+        const dummyLoadContents = "loadqqq";
+        const dummyCreateContents = "createqqq";
+
+        beforeEach((): void => {
+            resetFs();
+            loadClassStub.restore();
+            createClassStub = sinon.stub(classLoader as any, "createClass")
+                .returns(dummyCreateContents);
+        });
+
+        it("should load classes with existing files", (): void => {
+            readFileSync.returns(dummyLoadContents);
+            const contents = (classLoader as any).loadClass(fileToLoad);
+            readFileSync.should.have.been.calledOnce;
+            readFileSync.should.have.been.calledWithExactly(fileToLoad, "utf-8");
+            createClassStub.should.not.have.been.called;
+            contents.should.equal(dummyLoadContents);
+        });
+
+        it("should create classes without files", (): void => {
+            readFileSync.throws();
+            const contents = (classLoader as any).loadClass(fileToLoad);
+            readFileSync.should.have.been.calledOnce;
+            readFileSync.should.have.been.calledWithExactly(fileToLoad, "utf-8");
+            createClassStub.should.have.been.calledOnce;
+            createClassStub.should.have.been.calledWithExactly(fileToLoad);
+            contents.should.equal(dummyCreateContents);
+        });
     });
 
     afterEach((): void => {
-        createClassStub.restore();
         loadClassStub.restore();
     });
 
@@ -54,7 +116,7 @@ describe("ClassLoader", (): void => {
     function resetPath(): void {
         basename.reset();
         basename.callsFake((input: string) => {
-            return input.replace(/\.\w+$/i, "");
+            return input.replace(/^.*?(\w+)(\.\w+)?$/, "$1");
         });
     }
 });
