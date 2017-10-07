@@ -36,7 +36,7 @@ export class FileResolver extends InheritsCliDecoratorOptions {
     /**
      * Returns everything from `process.argv` after `node` and the calling
      * script. The assumption is that everything after the script will be either
-     * a filename or class name (whose file should be created)
+     * a filename or class name (whose file should be created).
      *
      * @return {string[]}
      * An array of file inputs
@@ -45,6 +45,13 @@ export class FileResolver extends InheritsCliDecoratorOptions {
         return process.argv.slice(2);
     }
 
+    /**
+     * Checks for the presence of input files.
+     *
+     * @param {string[]} files
+     * An array of file inputs
+     * @throws if no input passed
+     */
     private validateFiles(files: string[]): void {
         if (files.length < 1) {
             const error = new Error(FileResolver.ERROR_NO_INPUT);

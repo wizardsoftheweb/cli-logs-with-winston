@@ -69,6 +69,24 @@ describe("FileResolver", (): void => {
         });
     });
 
+    describe("validateFiles", (): void => {
+        beforeEach((): void => {
+            validateStub.restore();
+        });
+
+        it("should throw if no input found", (): void => {
+            (resolver as any).validateFiles.bind(resolver, [])
+                .should.throw(FileResolver.ERROR_NO_INPUT);
+        });
+
+        it("should do nothing if input is found", (): void => {
+            // Binding valid input isn't enough to check the else branch
+            (resolver as any).validateFiles(["one", "two"]);
+            // If the above doesn't throw, it's properly validated
+            true.should.be.true;
+        });
+    });
+
     afterEach((): void => {
         parseStub.restore();
         validateStub.restore();
