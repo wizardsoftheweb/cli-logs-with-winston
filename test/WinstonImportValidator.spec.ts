@@ -22,9 +22,18 @@ describe("WinstonImportValidator", (): void => {
     let checkWinstonImportStub: sinon.SinonStub;
     let winstonImportValidator: any;
 
+    const dummyContents = "qqq";
+
     beforeEach((): void => {
         checkWinstonImportStub = sinon.stub(WinstonImportValidator.prototype as any, "checkWinstonImport");
-        winstonImportValidator = new WinstonImportValidator({} as any);
+        winstonImportValidator = new WinstonImportValidator(dummyContents, {} as any);
+    });
+
+    describe("constructor", (): void => {
+        it("should check the given contents", (): void => {
+            checkWinstonImportStub.should.have.been.calledOnce;
+            checkWinstonImportStub.should.have.been.calledWithExactly(dummyContents);
+        });
     });
 
     afterEach((): void => {
