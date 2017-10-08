@@ -4,6 +4,7 @@
 import * as chai from "chai";
 // Needed for describe, it, etc.
 import { } from "mocha";
+import {EOL} from "os";
 import * as proxyquire from "proxyquire";
 import * as sinon from "sinon";
 import * as sinonChai from "sinon-chai";
@@ -33,6 +34,18 @@ describe("WinstonImportValidator", (): void => {
         it("should check the given contents", (): void => {
             checkWinstonImportStub.should.have.been.calledOnce;
             checkWinstonImportStub.should.have.been.calledWithExactly(dummyContents);
+        });
+    });
+
+    describe("createWinstonImport", (): void => {
+        it("should prepend the import", (): void => {
+            const contents = "contents of file;";
+            const predictedOutput = `\
+import { LoggerInstance } from "winston";${EOL}\
+${EOL}\
+contents of file;`;
+            const output = (winstonImportValidator as any).createWinstonImport(contents);
+            output.should.equal(predictedOutput);
         });
     });
 
