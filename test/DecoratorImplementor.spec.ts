@@ -94,6 +94,28 @@ after imports;
         });
     });
 
+    describe("findOrImportLogsWithWinston", (): void => {
+        let prependLogsWithWinstonImportStub: sinon.SinonStub;
+
+        beforeEach((): void => {
+            prependLogsWithWinstonImportStub = sinon.stub(decoratorImplementor as any, "prependLogsWithWinstonImport");
+        });
+
+        it("should pass through contents with import already exists", (): void => {
+            const contents = "import { LogsWithWinston } from '@wizardsoftheweb/logs-with-winston';";
+            const output = (decoratorImplementor as any).findOrImportLogsWithWinston(contents);
+            output.should.equal(contents);
+            prependLogsWithWinstonImportStub.should.not.have.been.called;
+        });
+
+        it("should prepend import when not found", (): void => {
+            const contents = "import { NotLogs } from 'not-the-right-package';";
+            const output = (decoratorImplementor as any).findOrImportLogsWithWinston(contents);
+            prependLogsWithWinstonImportStub.should.have.been.calledOnce;
+            prependLogsWithWinstonImportStub.should.have.been.calledWithExactly(contents);
+        });
+    });
+
     // describe("appendImplements", (): void => {
 
     // });
