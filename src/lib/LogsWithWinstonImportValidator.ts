@@ -1,9 +1,23 @@
 import { InheritsCliDecoratorOptions } from "./InheritsCliDecoratorOptions";
 import { ICliDecoratorOptions } from "./interfaces";
 
+/**
+ * Ensures `LogsWithWinston` is imported and usable.
+ * @class LogsWithWinstonImportValidator
+ * @extends InheritsCliDecoratorOptions
+ */
 export class LogsWithWinstonImportValidator extends InheritsCliDecoratorOptions {
+    /** @type {string} The contents of the class file to validate */
     public contents: string;
 
+    /**
+     * Checks the given file for `LogsWithWinston` and imports if not found.
+     *
+     * @param {string}               contents
+     * Path to the class to validate
+     * @param {ICliDecoratorOptions} options
+     * The options to use
+     */
     public constructor(contents: string, options: ICliDecoratorOptions) {
         super(options);
         this.contents = this.findOrImportLogsWithWinston(contents);
