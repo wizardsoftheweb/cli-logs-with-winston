@@ -73,7 +73,31 @@ whoamiWinston: string;
     }
 
     /**
-     * Determine how `winston` is being used in the file.
+     * Determine how `ILogsWithWinston` is being used in the file.
+     *
+     * @param  {string} contents
+     * File contents to parse
+     * @return {string}
+     * The string to use as the type `LoggerInstance`
+     */
+    private determineILogsWithWinstonUsage(contents: string): string {
+        /* tslint:disable:max-line-length */
+        const importRegExp = /^\s*import\s*(?:\{[\s\S]*?(?:ILogsWithWinston(?:\s+as\s+(\w*))?)[\s\S]*?\}|\* as (\w+))\s*from ['"]@wizardsoftheweb\/logs-with-winston['"];$/gmi;
+        const match: any = importRegExp.exec(contents);
+        if (typeof match[2] === "string") {
+            this.options.logger.silly(`Matched 'import * as ${match[2]} from "@wizardsoftheweb/logs-with-winston";'`);
+            return `${match[2]}.ILogsWithWinston`;
+        } else if (typeof match[1] === "string") {
+            this.options.logger.silly(`Matched 'import { ...ILogsWithWinston as ${match[1]}... } from "@wizardsoftheweb/logs-with-winston";'`);
+            return match[1];
+        }
+        this.options.logger.silly(`Matched 'import { ...ILogsWithWinston... } from "@wizardsoftheweb/logs-with-winston";'`);
+        /* tslint:enable:max-line-length */
+        return "ILogsWithWinston";
+    }
+
+    /**
+     * Determine how `LogsWithWinston` is being used in the file.
      *
      * @param  {string} contents
      * File contents to parse
@@ -106,15 +130,15 @@ whoamiWinston: string;
      * @return {string}
      * The new declaration with `LogsWithWinston`
      */
-    private appendImplements(match: string[], logsWithWinstonUsage: string): string {
+    private appendImplements(match: string[], iLogsWithWinstonUsage: string): string {
         if (typeof match[3] !== "undefined") {
-            if (match[3].indexOf(logsWithWinstonUsage) < 0) {
-                return match[0].replace(match[3], `${match[3]}, ${logsWithWinstonUsage}`);
+            if (match[3].indexOf(iLogsWithWinstonUsage) < 0) {
+                return match[0].replace(match[3], `${match[3]}, ${iLogsWithWinstonUsage}`);
             } else {
                 return match[0];
             }
         }
-        return `${match[2]} implements ${logsWithWinstonUsage}${match[4]}`;
+        return `${match[2]} implements ${iLogsWithWinstonUsage}${match[4]}`;
     }
 
     /**
@@ -130,6 +154,7 @@ whoamiWinston: string;
         let output = contents;
         const loggerInstance = this.determineWinstonUsage(contents);
         const logsWithWinston = this.determineLogsWithWinstonUsage(contents);
+        const iLogsWithWinston = this.determineILogsWithWinstonUsage(contents);
         const members = this.generateMembers(loggerInstance);
         const sanitizedMembers = members.replace(/\*/g, "\\*");
         let match: any;
@@ -139,7 +164,7 @@ whoamiWinston: string;
             output = output.replace(
                 match[0],
                 (match[1] || this.options.decorator + this.options.eol)
-                + this.appendImplements(match, logsWithWinston)
+                + this.appendImplements(match, iLogsWithWinston)
                 + members,
             )
                 .replace(new RegExp(`${sanitizedMembers}\\s*?${sanitizedMembers}`, "gmi"), members);
