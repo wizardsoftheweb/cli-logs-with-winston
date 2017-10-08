@@ -116,8 +116,55 @@ after imports;
         });
     });
 
-    // describe("appendImplements", (): void => {
+    describe("determineLogsWithWinstonUsage", (): void => {
+        it("should find '* as LogsWithWinston'", (): void => {
+            const loggerInstance = (decoratorImplementor as any).determineLogsWithWinstonUsage(
+                "import * as LogsWithWinston from '@wizardsoftheweb/logs-with-winston';",
+            );
+            loggerInstance.should.equal("LogsWithWinston.LogsWithWinston");
+        });
 
+        it("should find '{ LogsWithWinston as SomethingElse }'", (): void => {
+            const loggerInstance = (decoratorImplementor as any).determineLogsWithWinstonUsage(
+                "import { LogsWithWinston as SomethingElse } from '@wizardsoftheweb/logs-with-winston';",
+            );
+            loggerInstance.should.equal("SomethingElse");
+        });
+
+        it("should assume LogsWithWinston otherwise", (): void => {
+            const loggerInstance = (decoratorImplementor as any).determineLogsWithWinstonUsage(
+                "import { LogsWithWinston } from '@wizardsoftheweb/logs-with-winston';",
+            );
+            loggerInstance.should.equal("LogsWithWinston");
+        });
+    });
+
+    // describe("appendImplements", (): void => {
+    //     const regExp = DecoratorImplementor.DECLARATION_REGEXP;
+    //     const winstonUsage = "LoggerInstance";
+
+    //     it("should append LogsWithWinston to implemented classes when not found", (): void => {
+    //         const contents = `export class SomeClass implements SomeInterface {${EOL}`;
+    //         const predictedOutput = "export class SomeClass implements SomeInterface, LogsWithWinston {";
+    //         const match = regExp.exec(contents);
+    //         const output = (decoratorImplementor as any).appendImplements(match, winstonUsage);
+    //         output.should.equal(predictedOutput);
+    //     });
+
+    //     it("should add implements on vanilla classes", (): void => {
+    //         const contents = "export class SomeClass {";
+    //         const predictedOutput = "export class SomeClass implements LogsWithWinston {";
+    //         const match = regExp.exec(contents);
+    //         const output = (decoratorImplementor as any).appendImplements(match, winstonUsage);
+    //         output.should.equal(predictedOutput);
+    //     });
+
+    //     it("should do nothing when class implements LogsWithWinston already", (): void => {
+    //         const contents = "export class SomeClass implements LogsWithWinston {";
+    //         const match = regExp.exec(contents);
+    //         const output = (decoratorImplementor as any).appendImplements(match, winstonUsage);
+    //         output.should.equal(contents);
+    //     });
     // });
 
     afterEach((): void => {
