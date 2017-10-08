@@ -40,19 +40,22 @@ describe("Decorating vanilla classes", (): void => {
                     }
                 });
         })
-        .then(() => {
-            shelljs.rm("-rf", tmpDir);
-            shelljs.mkdir("-p", path.join(tmpDir, "src"));
-            const files = shelljs.find(path.join(__dirname, "input"));
-            for (const filename of files) {
-                if (filename.match(/\.json$/i)) {
-                    shelljs.cp(filename, tmpDir);
-                } else if (filename.match(/\.ts$/i)) {
-                    shelljs.cp(filename, path.join(tmpDir, "src"));
+            .then((): Bluebird<void> => {
+                shelljs.chmod("+x", logsWithWinstonCli);
+                return Bluebird.resolve();
+            })
+            .then((): void => {
+                shelljs.rm("-rf", tmpDir);
+                shelljs.mkdir("-p", path.join(tmpDir, "src"));
+                const files = shelljs.find(path.join(__dirname, "input"));
+                for (const filename of files) {
+                    if (filename.match(/\.json$/i)) {
+                        shelljs.cp(filename, tmpDir);
+                    } else if (filename.match(/\.ts$/i)) {
+                        shelljs.cp(filename, path.join(tmpDir, "src"));
+                    }
                 }
-            }
-            return Bluebird.resolve();
-        });
+            });
     });
 
     beforeEach((): void => {

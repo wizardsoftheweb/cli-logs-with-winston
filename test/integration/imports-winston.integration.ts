@@ -49,7 +49,11 @@ describe("Decorating classes with winston imports", function(): void {
                     }
                 });
         })
-            .then(() => {
+            .then((): Bluebird<void> => {
+                shelljs.chmod("+x", logsWithWinstonCli);
+                return Bluebird.resolve();
+            })
+            .then((): Bluebird<void> => {
                 shelljs.rm("-rf", tmpDir);
                 shelljs.mkdir("-p", path.join(tmpDir, "src"));
                 const files = shelljs.find(path.join(__dirname, "input"));
@@ -62,7 +66,7 @@ describe("Decorating classes with winston imports", function(): void {
                 }
                 return Bluebird.resolve();
             })
-            .then(() => {
+            .then((): void => {
                 const files = shelljs.find(path.join(tmpDir, "src", "*.ts"));
                 let patternIndex = 0;
                 for (const filename of files) {
