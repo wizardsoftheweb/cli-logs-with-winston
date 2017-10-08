@@ -72,21 +72,6 @@ whoamiWinston: string;
     }
 
     /**
-     * Appends `(implements )?,? LogsWithWinston` to the class declaration
-     *
-     * @param  {string[]} match
-     * The found class declaration
-     * @return {string}
-     * The new declaration with `LogsWithWinston`
-     */
-    private appendImplements(match: string[]): string {
-        if (typeof match[2] !== "undefined") {
-            return match[0].replace(match[2], `${match[2]}, LogsWithWinston`);
-        }
-        return `${match[1]} implements LogsWithWinston ${match[3]}`;
-    }
-
-    /**
      * Adds an import after the last found import.
      *
      * @param  {string} contents
@@ -118,6 +103,21 @@ import { LogsWithWinston } from "@wizardsoftheweb/logs-with-winston";${this.opti
             return contents;
         }
         return this.prependLogsWithWinstonImport(contents);
+    }
+
+    /**
+     * Appends `(implements )?,? LogsWithWinston` to the class declaration
+     *
+     * @param  {string[]} match
+     * The found class declaration
+     * @return {string}
+     * The new declaration with `LogsWithWinston`
+     */
+    private appendImplements(match: string[]): string {
+        if (typeof match[2] !== "undefined") {
+            return match[0].replace(match[2], `${match[2]}, LogsWithWinston`);
+        }
+        return `${match[1]} implements LogsWithWinston ${match[3]}`;
     }
 
     /**

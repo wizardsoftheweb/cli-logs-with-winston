@@ -73,6 +73,10 @@ describe("DecoratorImplementor", (): void => {
         });
     });
 
+    // describe("appendImplements", (): void => {
+
+    // });
+
     afterEach((): void => {
         decorateStub.restore();
     });
