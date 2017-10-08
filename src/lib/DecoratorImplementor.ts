@@ -87,6 +87,40 @@ whoamiWinston: string;
     }
 
     /**
+     * Adds an import after the last found import.
+     *
+     * @param  {string} contents
+     * File contents that need an import
+     * @return {string}
+     * File contents with import
+     */
+    private prependLogsWithWinstonImport(contents: string): string {
+        const allImports = /^[\s\S]*import[\s\S]*?$/gmi;
+        return contents.replace(
+            allImports,
+            `$1\
+${this.options.eol}\
+import { LogsWithWinston } from "@wizardsoftheweb/logs-with-winston";${this.options.eol}`,
+            );
+    }
+
+    /**
+     * Checks for a `LogsWithWinston` import and adds one if not found.
+     *
+     * @param  {string} contents
+     * File contents to check
+     * @return {string}
+     * File contents with a `LogsWithWinston` import
+     */
+    private findOrImportLogsWithWinston(contents: string): string {
+        const importLogsWithWinstonRegExp = /^\s*import[\s\S]*?(LogsWithWinston|logs-with-winston)[\s\S]*?;$/gmi;
+        if (importLogsWithWinstonRegExp.test(contents)) {
+            return contents;
+        }
+        return this.prependLogsWithWinstonImport(contents);
+    }
+
+    /**
      * Decorates every class declaration found by a properly decorated class
      * implementing `LogsWithWinston`.
      *
