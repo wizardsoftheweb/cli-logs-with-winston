@@ -29,7 +29,7 @@ describe("Decorating vanilla classes", (): void => {
             for (const filename of files) {
                 if (filename.match(/\.json$/i)) {
                     shelljs.cp(filename, tmpDir);
-                } else {
+                } else if (filename.match(/\.ts$/i)) {
                     shelljs.cp(filename, path.join(tmpDir, "src"));
                 }
             }
