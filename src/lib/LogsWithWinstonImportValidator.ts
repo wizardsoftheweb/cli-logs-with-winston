@@ -38,9 +38,9 @@ export class LogsWithWinstonImportValidator extends InheritsCliDecoratorOptions 
             `$1\
 ${this.options.eol}\
 ${this.options.eol}\
-import {${this.options.eol}
-${this.options.indent}ILogsWithWinston,${this.options.eol}
-${this.options.indent}LogsWithWinston,${this.options.eol}
+import {${this.options.eol}\
+${this.options.indent}ILogsWithWinston,${this.options.eol}\
+${this.options.indent}LogsWithWinston,${this.options.eol}\
 } from "@wizardsoftheweb/logs-with-winston";${this.options.eol}\
 ${this.options.eol}`,
         )
