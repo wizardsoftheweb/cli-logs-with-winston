@@ -16,7 +16,9 @@ chai.use(sinonChai);
 const writeFileSync = sinon.stub();
 const ClassLoader = sinon.stub();
 const DecoratorImplementor = sinon.stub();
+const files = ["one", "two"];
 const FileResolver = sinon.stub();
+FileResolver.returns({ files });
 const WinstonImportValidator = sinon.stub();
 const CliDecorator = proxyquire("../src/lib/CliDecorator", {
     /* tslint:disable:object-literal-key-quotes */
@@ -50,6 +52,12 @@ describe("CliDecorator", (): void => {
     beforeEach((): void => {
         decorateStub = sinon.stub(CliDecorator.prototype as any, "decorate");
         cliDecorator = new CliDecorator({} as any);
+    });
+
+    describe("constructor", (): void => {
+        it("should assign files", (): void => {
+            (cliDecorator as any).files.should.deep.equal(files);
+        });
     });
 
     afterEach((): void => {
