@@ -16,7 +16,7 @@ import * as sinonChai from "sinon-chai";
 const should = chai.should();
 chai.use(sinonChai);
 
-const tmpDir = path.resolve(path.join(__dirname, "..", "..", ".integrationLogsTest"));
+const tmpDir = path.resolve(path.join(__dirname, "..", "..", ".binIntegrationTest"));
 const tsLint = path.resolve(path.join(__dirname, "..", "..", "node_modules", ".bin", "tslint"));
 const tsc = path.resolve(path.join(__dirname, "..", "..", "node_modules", ".bin", "tsc"));
 const dist = path.resolve(path.join(__dirname, "..", "..", "dist"));
