@@ -118,29 +118,29 @@ describe("Decorating vanilla classes", (): void => {
         });
     });
 
-    // describe("post-decoration", (): void => {
-    //     beforeEach((): void => {
-    //         dumpDist();
-    //     });
+    describe("post-decoration", (): void => {
+        beforeEach((): void => {
+            dumpDist();
+        });
 
-    //     it("should lint without error", (): Bluebird<void> => {
-    //         return lint()
-    //             .then((input: string): void => {
-    //                 input.should.have.lengthOf(0);
-    //             });
-    //     }).timeout(10000);
+        it("should lint without error", (): Bluebird<void> => {
+            return lint()
+                .then((input: string): void => {
+                    input.should.have.lengthOf(0);
+                });
+        }).timeout(10000);
 
-    //     it("should compile without error", (): Bluebird<void> => {
-    //         return compile()
-    //             .then((input: string): void => {
-    //                 input.should.have.lengthOf(0);
-    //             });
-    //     }).timeout(10000);
+        it("should compile without error", (): Bluebird<void> => {
+            return compile()
+                .then((input: string): void => {
+                    input.should.have.lengthOf(0);
+                });
+        }).timeout(10000);
 
-    //     after((): void => {
-    //         dumpDist();
-    //     });
-    // });
+        after((): void => {
+            dumpDist();
+        });
+    });
 
     function dumpDist(): void {
         shelljs.rm("-rf", path.join(tmpDir, "dist"));
