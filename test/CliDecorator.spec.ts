@@ -13,11 +13,24 @@ import { InheritsCliDecoratorOptions } from "../src/lib/InheritsCliDecoratorOpti
 const should = chai.should();
 chai.use(sinonChai);
 
+const contents = "qqq";
+
 const writeFileSync = sinon.stub();
-const ClassLoader = sinon.stub();
-const DecoratorImplementor = sinon.stub();
-const FileResolver = sinon.stub();
-const WinstonImportValidator = sinon.stub();
+const ClassLoader = sinon.stub()
+    .callsFake((input: string) => {
+        return { contents: input };
+    });
+const DecoratorImplementor = sinon.stub()
+    .callsFake((input: string) => {
+        return { contents: input };
+    });
+const files = ["one", "two"];
+const FileResolver = sinon.stub()
+    .returns({ files });
+const WinstonImportValidator = sinon.stub()
+    .callsFake((input: string) => {
+        return { contents: input };
+    });
 const CliDecorator = proxyquire("../src/lib/CliDecorator", {
     /* tslint:disable:object-literal-key-quotes */
     "./ClassLoader": {
@@ -44,16 +57,45 @@ const CliDecorator = proxyquire("../src/lib/CliDecorator", {
 }).CliDecorator;
 
 describe("CliDecorator", (): void => {
-    let decorateStub: sinon.SinonStub;
     let cliDecorator: any;
 
     beforeEach((): void => {
-        decorateStub = sinon.stub(CliDecorator.prototype as any, "decorate");
-        cliDecorator = new CliDecorator({} as any);
+        resetFs();
     });
 
-    afterEach((): void => {
-        decorateStub.restore();
+    describe("constructor", (): void => {
+        it("should assign files", (): void => {
+            cliDecorator = new CliDecorator();
+            (cliDecorator as any).files.should.deep.equal(files);
+        });
+    });
+
+    describe("decorate", (): void => {
+        it("should decorate all files", (): void => {
+            cliDecorator = new CliDecorator({} as any);
+            const options = (cliDecorator as any).options;
+            cliDecorator.decorate();
+            ClassLoader.should.have.callCount(files.length);
+            WinstonImportValidator.should.have.callCount(files.length);
+            DecoratorImplementor.should.have.callCount(files.length);
+            writeFileSync.should.have.callCount(files.length);
+            const iterations = new Array(files.length).fill(0).map((current: number, index: number) => {
+                return index;
+            });
+            for (const iteration of iterations) {
+                const classLoaderCall = ClassLoader.getCall(iteration);
+                classLoaderCall.should.have.been.calledWithNew;
+                classLoaderCall.should.have.been.calledWithExactly(files[iteration], options);
+                const winstonImportValidatorCall = WinstonImportValidator.getCall(iteration);
+                winstonImportValidatorCall.should.have.been.calledWithNew;
+                winstonImportValidatorCall.should.have.been.calledWithExactly(files[iteration], options);
+                const decoratorImplementorCall = DecoratorImplementor.getCall(iteration);
+                decoratorImplementorCall.should.have.been.calledWithNew;
+                decoratorImplementorCall.should.have.been.calledWithExactly(files[iteration], options);
+                const writeFileSyncCall = writeFileSync.getCall(iteration);
+                writeFileSyncCall.should.have.been.calledWithExactly(files[iteration], files[iteration], "utf-8");
+            }
+        });
     });
 
     function resetFs(): void {
