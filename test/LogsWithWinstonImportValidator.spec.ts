@@ -100,80 +100,57 @@ ${indent}transports,${EOL}\
         });
     });
 
-//     describe("findOrCreateLogsWithWinstonImport", (): void => {
-//         let createLogsWithWinstonImportStub: sinon.SinonStub;
+    describe("findOrCreateLogsWithWinstonImport", (): void => {
+        let findOrInsertImportsStub: sinon.SinonStub;
+        let createLogsWithWinstonImportStub: sinon.SinonStub;
 
-//         beforeEach((): void => {
-//             findOrCreateLogsWithWinstonImportStub.restore();
-//             createLogsWithWinstonImportStub = sinon.stub(
-//                 logsWithWinstonImportValidator as any,
-//                 "createLogsWithWinstonImport",
-//             );
-//         });
+        const defaultReplacedImports = "qqq";
 
-//         it("should pass through contents with import already exists", (): void => {
-//             const contents = "import { LogsWithWinston } from '@wizardsoftheweb/logs-with-winston';";
-//             const output = (logsWithWinstonImportValidator as any).findOrCreateLogsWithWinstonImport(contents);
-//             output.should.equal(contents);
-//             createLogsWithWinstonImportStub.should.not.have.been.called;
-//         });
+        beforeEach((): void => {
+            findOrCreateLogsWithWinstonImportStub.restore();
+            findOrInsertImportsStub = sinon.stub(
+                logsWithWinstonImportValidator as any,
+                "findOrInsertImports",
+            );
+            findOrInsertImportsStub.returns(`${EOL}${indent}ILogsWithWinston,${EOL}${indent}LogsWithWinston,${EOL}`);
+            createLogsWithWinstonImportStub = sinon.stub(
+                logsWithWinstonImportValidator as any,
+                "createLogsWithWinstonImport",
+            );
+        });
 
-//         it("should prepend import when not found", (): void => {
-//             const contents = "import { NotLogs } from 'not-the-right-package';";
-//             const output = (logsWithWinstonImportValidator as any).findOrCreateLogsWithWinstonImport(contents);
-//             createLogsWithWinstonImportStub.should.have.been.calledOnce;
-//             createLogsWithWinstonImportStub.should.have.been.calledWithExactly(contents);
-//         });
-//     });
+        it("should create an import when one is not found", (): void => {
+            const contents = "file contents;";
+            (logsWithWinstonImportValidator as any).findOrCreateLogsWithWinstonImport(contents);
+            findOrInsertImportsStub.should.not.have.been.called;
+            createLogsWithWinstonImportStub.should.have.been.calledOnce;
+            createLogsWithWinstonImportStub.should.have.been.calledWithExactly(contents);
+        });
 
-//     describe("findOrCreateLogsWithWinstonImport", (): void => {
-//         let findOrInsertLoggerInstanceImportStub: sinon.SinonStub;
-//         let createLogsWithWinstonImportStub: sinon.SinonStub;
+        it("should do nothing when a glob import is found", (): void => {
+            const contents = `import * as winston from "@wizardsoftheweb\/logs-with-winston";${EOL}file contents;`;
+            const output = (logsWithWinstonImportValidator as any).findOrCreateLogsWithWinstonImport(contents);
+            findOrInsertImportsStub.should.not.have.been.called;
+            createLogsWithWinstonImportStub.should.not.have.been.called;
+            output.should.equal(contents);
+        });
 
-//         const defaultReplacedImports = "qqq";
-
-//         beforeEach((): void => {
-//             findOrCreateLogsWithWinstonImportStub.restore();
-//             findOrInsertLoggerInstanceImportStub = sinon.stub(
-//                 logsWithWinstonImportValidator as any,
-//                 "findOrInsertLoggerInstanceImport",
-//             );
-//             findOrInsertLoggerInstanceImportStub.returns(`${EOL}${indent}Logger,${EOL}${indent}LoggerInstance,${EOL}`);
-//             createLogsWithWinstonImportStub = sinon.stub(logsWithWinstonImportValidator as any, "createWinstonImport");
-//         });
-
-//         it("should create an import when one is not found", (): void => {
-//             const contents = "file contents;";
-//             (logsWithWinstonImportValidator as any).checkWinstonImport(contents);
-//             findOrInsertLoggerInstanceImportStub.should.not.have.been.called;
-//             createWinstonImportStub.should.have.been.calledOnce;
-//             createWinstonImportStub.should.have.been.calledWithExactly(contents);
-//         });
-
-//         it("should do nothing when a glob import is found", (): void => {
-//             const contents = `import * as winston from "winston";${EOL}file contents;`;
-//             const output = (logsWithWinstonImportValidator as any).checkWinstonImport(contents);
-//             findOrInsertLoggerInstanceImportStub.should.not.have.been.called;
-//             createWinstonImportStub.should.not.have.been.called;
-//             output.should.equal(contents);
-//         });
-
-//         it("should attempt to insert a LoggerInstance reference when specific imports are found", (): void => {
-//             const imports = `${EOL}${indent}LoggerInstance,${EOL}${indent}Logger,${EOL}`;
-//             const contents = `import {${imports}} from "winston";${EOL}file contents;`;
-//             const predictedOutput =`\
-// import {${EOL}\
-// ${indent}Logger,${EOL}\
-// ${indent}LoggerInstance,${EOL}\
-// } from "winston";${EOL}\
-// file contents;`;
-//             const output = (logsWithWinstonImportValidator as any).checkWinstonImport(contents);
-//             findOrInsertLoggerInstanceImportStub.should.have.been.calledOnce;
-//             findOrInsertLoggerInstanceImportStub.should.have.been.calledWithExactly(imports);
-//             createWinstonImportStub.should.not.have.been.called;
-//             output.should.equal(predictedOutput);
-//         });
-//     });
+        it("should attempt to insert a LoggerInstance reference when specific imports are found", (): void => {
+            const imports = `${EOL}${indent}LogsWithWinston,${EOL}${indent}ILogsWithWinston,${EOL}`;
+            const contents = `import {${imports}} from "@wizardsoftheweb\/logs-with-winston";${EOL}file contents;`;
+            const predictedOutput = `\
+import {${EOL}\
+${indent}ILogsWithWinston,${EOL}\
+${indent}LogsWithWinston,${EOL}\
+} from "@wizardsoftheweb\/logs-with-winston";${EOL}\
+file contents;`;
+            const output = (logsWithWinstonImportValidator as any).findOrCreateLogsWithWinstonImport(contents);
+            findOrInsertImportsStub.should.have.been.calledOnce;
+            findOrInsertImportsStub.should.have.been.calledWithExactly(imports);
+            createLogsWithWinstonImportStub.should.not.have.been.called;
+            output.should.equal(predictedOutput);
+        });
+    });
 
     afterEach((): void => {
         findOrCreateLogsWithWinstonImportStub.restore();
