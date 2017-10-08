@@ -110,22 +110,48 @@ ${this.options.eol}`,
     }
 
     /**
+     * Determine how `winston` is being used in the file.
+     *
+     * @param  {string} contents
+     * File contents to parse
+     * @return {string}
+     * The string to use as the type `LoggerInstance`
+     */
+    private determineLogsWithWinstonUsage(contents: string): string {
+        /* tslint:disable:max-line-length */
+        const importRegExp = /^\s*import\s*(?:\{[\s\S]*?(?:LogsWithWinston(?:\s+as\s+(\w*))?)[\s\S]*?\}|\* as (\w+))\s*from ['"]@wizardsoftheweb\/logs-with-winston['"];$/gmi;
+        const match: any = importRegExp.exec(contents);
+        if (typeof match[2] === "string") {
+            this.options.logger.silly(`Matched 'import * as ${match[2]} from "@wizardsoftheweb/logs-with-winston";'`);
+            return `${match[2]}.LogsWithWinston`;
+        } else if (typeof match[1] === "string") {
+            this.options.logger.silly(`Matched 'import { ...LogsWithWinston as ${match[1]}... } from "@wizardsoftheweb/logs-with-winston";'`);
+            return match[1];
+        }
+        this.options.logger.silly(`Matched 'import { ...LogsWithWinston... } from "@wizardsoftheweb/logs-with-winston";'`);
+        /* tslint:enable:max-line-length */
+        return "LogsWithWinston";
+    }
+
+    /**
      * Appends `(implements )?,? LogsWithWinston` to the class declaration
      *
      * @param  {string[]} match
      * The found class declaration
+     * @param {string} logsWithWinstonUsage
+     * The found name for `logsWithWinstonUsage`
      * @return {string}
      * The new declaration with `LogsWithWinston`
      */
-    private appendImplements(match: string[], winstonUsage: string): string {
+    private appendImplements(match: string[], logsWithWinstonUsage: string): string {
         if (typeof match[2] !== "undefined") {
-            if (match[2].indexOf(winstonUsage) < 0) {
-                return match[0].replace(match[3], `${match[3]}, ${winstonUsage}`);
+            if (match[2].indexOf(logsWithWinstonUsage) < 0) {
+                return match[0].replace(match[3], `${match[3]}, ${logsWithWinstonUsage}`);
             } else {
                 return match[0];
             }
         }
-        return `${match[2]} implements ${winstonUsage} ${match[4]}`;
+        return `${match[2]} implements ${logsWithWinstonUsage} ${match[4]}`;
     }
 
     /**
@@ -140,6 +166,7 @@ ${this.options.eol}`,
     private decorate(contents: string): string {
         let output = contents;
         const loggerInstance = this.determineWinstonUsage(contents);
+        const logsWithWinston = this.determineLogsWithWinstonUsage(contents);
         let match: any;
         /* tslint:disable-next-line:no-conditional-assignment */
         while (match = DecoratorImplementor.DECLARATION_REGEXP.exec(contents)) {
