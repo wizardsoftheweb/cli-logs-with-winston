@@ -4,6 +4,7 @@
 import * as chai from "chai";
 // Needed for describe, it, etc.
 import { } from "mocha";
+import { EOL } from "os";
 import * as proxyquire from "proxyquire";
 import * as sinon from "sinon";
 import * as sinonChai from "sinon-chai";
@@ -53,6 +54,22 @@ describe("DecoratorImplementor", (): void => {
                 "import { LoggerInstance } from 'winston';",
             );
             loggerInstance.should.equal("LoggerInstance");
+        });
+    });
+
+    describe("generateMembers", (): void => {
+        const defaultMembers = `${EOL}\
+    /* Begin LogsWithWinston copypasta */${EOL}\
+    /* tslint:disable */${EOL}\
+    logger: LoggerInstance;${EOL}\
+    naivePrototypeChain: string[];${EOL}\
+    whoamiWinston: string;${EOL}\
+    /* tslint:enable */${EOL}\
+    /* End LogsWithWinston copypasta */${EOL}`;
+
+        it("should properly generate the members", (): void => {
+            (decoratorImplementor as any).generateMembers("LoggerInstance")
+            .should.equal(defaultMembers);
         });
     });
 
