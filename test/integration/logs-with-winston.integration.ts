@@ -161,6 +161,10 @@ describe("Decorating vanilla classes", (): void => {
         });
     });
 
+    after((): void => {
+        shelljs.rm("-rf", tmpDir);
+    });
+
     function dumpDist(): void {
         shelljs.rm("-rf", path.join(tmpDir, "dist"));
     }
