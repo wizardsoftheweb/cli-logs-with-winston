@@ -8,7 +8,7 @@
 - [Tests](#tests)
 - [Usage](#usage)
     - [API](#api)
-        - [Examples](#examples)
+    - [Examples](#examples)
 - [Scope?](#scope)
 - [Roadmap](#roadmap)
     - [Main Features](#mainfeatures)
@@ -36,7 +36,7 @@ npm t
 
 TODO: Docs
 
-#### Examples
+### Examples
 
 TODO: examples
 
@@ -54,11 +54,11 @@ Once all of these are finished, I'll release `v1`. Until then, `v0` should be us
 
 | Progess | Feature |
 | ------: | ------- |
-|      0% | Add bin script |
-|      0% | Test |
-|      0% | Export the full namespace |
-|      0% | Compile declaration file |
-|      0% |  Write docs |
+|    100% | Add bin script |
+|     80% | Test |
+|     90% | Export the full namespace |
+|     90% | Compile declaration file |
+|      0% | Write docs |
 |      0% | Publish package on `npm` |
 
 ### Eventual features
