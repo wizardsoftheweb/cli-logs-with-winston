@@ -164,20 +164,23 @@ ${this.options.eol}`,
      * The decorated contents
      */
     private decorate(contents: string): string {
-        let output = contents;
+        let output = this.findOrImportLogsWithWinston(contents);
         const loggerInstance = this.determineWinstonUsage(contents);
         const logsWithWinston = this.determineLogsWithWinstonUsage(contents);
+        const members = this.generateMembers(loggerInstance);
+        const sanitizedMembers = members.replace(/\*/g, "\\*");
         let match: any;
+        DecoratorImplementor.DECLARATION_REGEXP.lastIndex = 0;
         /* tslint:disable-next-line:no-conditional-assignment */
         while (match = DecoratorImplementor.DECLARATION_REGEXP.exec(contents)) {
             output = output.replace(
                 match[0],
-                (match[1] || this.options.decorator)
-                + this.options.eol
+                (match[1] || this.options.decorator + this.options.eol)
                 + this.appendImplements(match, loggerInstance)
-                + this.generateMembers(loggerInstance),
-            );
+                + members,
+            )
+                .replace(new RegExp(`${sanitizedMembers}\\s*?${sanitizedMembers}`, "gmi"), members);
         }
-        return contents;
+        return output;
     }
 }
