@@ -3,6 +3,7 @@
 /* tslint:disable:no-unused-expression */
 import * as Bluebird from "bluebird";
 import * as chai from "chai";
+import {} from "errors";
 import * as fs from "fs";
 // Needed for describe, it, etc.
 import { } from "mocha";
@@ -16,7 +17,7 @@ import * as sinonChai from "sinon-chai";
 const should = chai.should();
 chai.use(sinonChai);
 
-const tmpDir = path.resolve(path.join(__dirname, "..", "..", ".binIntegrationTest"));
+const tmpDir = path.resolve(path.join(__dirname, "..", "..", ".integrationWinstonTest"));
 const tsLint = path.resolve(path.join(__dirname, "..", "..", "node_modules", ".bin", "tslint"));
 const tsc = path.resolve(path.join(__dirname, "..", "..", "node_modules", ".bin", "tsc"));
 const dist = path.resolve(path.join(__dirname, "..", "..", "dist"));
@@ -34,16 +35,13 @@ describe("Decorating classes with winston imports", function(): void {
 
     before((): Bluebird<void> => {
         return new Bluebird((resolve, reject) => {
-            shelljs.rm("-rf", dist);
             return shelljs.exec(
                 "npm run compile:npm",
-                { silent: true },
+                { silent: false },
                 (code: number, stdout: string, stderr: string) => {
                     const result = stdout.trim();
-                    if (code !== 0) {
-                        console.log(stdout);
-                        console.log(stderr);
-                        return reject(result);
+                    if (stderr !== "") {
+                        return reject(stderr);
                     } else {
                         return resolve(result);
                     }
@@ -80,6 +78,10 @@ describe("Decorating classes with winston imports", function(): void {
                     patternIndex++;
                     patternIndex = patternIndex % importPossibilites.length;
                 }
+            })
+            .catch((error: any) => {
+                console.log(error);
+                throw new Error(error);
             });
     });
 
@@ -189,12 +191,14 @@ describe("Decorating classes with winston imports", function(): void {
         });
     });
 
-    after((): void => {
+    after((): Bluebird<void> => {
         shelljs.rm("-rf", tmpDir);
+        return Bluebird.resolve();
     });
 
-    function dumpDist(): void {
+    function dumpDist(): Bluebird<void> {
         shelljs.rm("-rf", path.join(tmpDir, "dist"));
+        return Bluebird.resolve();
     }
 
     function lint(): Bluebird<any> {
