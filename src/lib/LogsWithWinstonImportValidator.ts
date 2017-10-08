@@ -32,7 +32,7 @@ export class LogsWithWinstonImportValidator extends InheritsCliDecoratorOptions 
      * File contents with import
      */
     private createLogsWithWinstonImport(contents: string): string {
-        const allImports = /([\s\S]*^import[\s\S]*?$)/gmi;
+        const allImports = /([\s\S]*^import[\s\S]*?;$)/gmi;
         return contents.replace(
             allImports,
             `$1\
