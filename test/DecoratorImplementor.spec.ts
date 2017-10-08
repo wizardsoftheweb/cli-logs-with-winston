@@ -73,6 +73,27 @@ describe("DecoratorImplementor", (): void => {
         });
     });
 
+    describe("prependLogsWithWinstonImport", (): void => {
+        const predictedOutput = `\
+import one;
+import two;${EOL}\
+import three;${EOL}\
+${EOL}\
+import { LogsWithWinston } from "@wizardsoftheweb/logs-with-winston";${EOL}\
+${EOL}\
+after imports;${EOL}`;
+        it("should add LogsWithWinston import after last import", (): void => {
+            const output = (decoratorImplementor as any).prependLogsWithWinstonImport(`\
+import one;
+import two;
+import three;
+
+after imports;
+`);
+            output.should.equal(predictedOutput);
+        });
+    });
+
     // describe("appendImplements", (): void => {
 
     // });

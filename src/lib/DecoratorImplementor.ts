@@ -80,13 +80,17 @@ whoamiWinston: string;
      * File contents with import
      */
     private prependLogsWithWinstonImport(contents: string): string {
-        const allImports = /^[\s\S]*import[\s\S]*?$/gmi;
+        const allImports = /([\s\S]*^import[\s\S]*?$)/gmi;
         return contents.replace(
             allImports,
             `$1\
 ${this.options.eol}\
-import { LogsWithWinston } from "@wizardsoftheweb/logs-with-winston";${this.options.eol}`,
-            );
+${this.options.eol}\
+import { LogsWithWinston } from "@wizardsoftheweb/logs-with-winston";${this.options.eol}\
+${this.options.eol}`,
+        )
+            // Replace multiple newlines with max two
+            .replace(/\r?\n$\s*\r?\n/gmi, this.options.eol + this.options.eol);
     }
 
     /**
