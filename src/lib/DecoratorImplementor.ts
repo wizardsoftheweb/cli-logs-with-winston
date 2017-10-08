@@ -11,7 +11,7 @@ import { ICliDecoratorOptions } from "./interfaces";
 export class DecoratorImplementor extends InheritsCliDecoratorOptions {
     /* tslint:disable-next-line:max-line-length */
     /** @type {RegExp} Class declaration regex */
-    public static DECLARATION_REGEXP = /(@LogsWithWinston[\s\S]*?)?^((?:export)?\s*?class\s+(?:\w+)(?:\s+extends\s+(?:[\w ,]+))?(?:\s+implements\s+([\w ,]+))?)(\s+\{)?$/gmi;
+    public static DECLARATION_REGEXP = /(@LogsWithWinston[\s\S]*?)?^((?:export)?\s*?class\s+(?:\w+)(?:\s+extends\s+(?:(?:(?!implements)[\w ,])+))?(?:\s+implements\s+([\w ,]+))?)(\s+\{)?$/gmi;
     /** @type {string} The contents of the file to decorate */
     public contents: string;
 
@@ -73,45 +73,31 @@ whoamiWinston: string;
     }
 
     /**
-     * Adds an import after the last found import.
+     * Determine how `ILogsWithWinston` is being used in the file.
      *
      * @param  {string} contents
-     * File contents that need an import
+     * File contents to parse
      * @return {string}
-     * File contents with import
+     * The string to use as the type `LoggerInstance`
      */
-    private prependLogsWithWinstonImport(contents: string): string {
-        const allImports = /([\s\S]*^import[\s\S]*?$)/gmi;
-        return contents.replace(
-            allImports,
-            `$1\
-${this.options.eol}\
-${this.options.eol}\
-import { LogsWithWinston } from "@wizardsoftheweb/logs-with-winston";${this.options.eol}\
-${this.options.eol}`,
-        )
-            // Replace multiple newlines with max two
-            .replace(/\r?\n$\s*\r?\n/gmi, this.options.eol + this.options.eol);
-    }
-
-    /**
-     * Checks for a `LogsWithWinston` import and adds one if not found.
-     *
-     * @param  {string} contents
-     * File contents to check
-     * @return {string}
-     * File contents with a `LogsWithWinston` import
-     */
-    private findOrImportLogsWithWinston(contents: string): string {
-        const importLogsWithWinstonRegExp = /^\s*import[\s\S]*?(LogsWithWinston|logs-with-winston)[\s\S]*?;$/gmi;
-        if (importLogsWithWinstonRegExp.test(contents)) {
-            return contents;
+    private determineILogsWithWinstonUsage(contents: string): string {
+        /* tslint:disable:max-line-length */
+        const importRegExp = /^\s*import\s*(?:\{[\s\S]*?(?:ILogsWithWinston(?:\s+as\s+(\w*))?)[\s\S]*?\}|\* as (\w+))\s*from ['"]@wizardsoftheweb\/logs-with-winston['"];$/gmi;
+        const match: any = importRegExp.exec(contents);
+        if (typeof match[2] === "string") {
+            this.options.logger.silly(`Matched 'import * as ${match[2]} from "@wizardsoftheweb/logs-with-winston";'`);
+            return `${match[2]}.ILogsWithWinston`;
+        } else if (typeof match[1] === "string") {
+            this.options.logger.silly(`Matched 'import { ...ILogsWithWinston as ${match[1]}... } from "@wizardsoftheweb/logs-with-winston";'`);
+            return match[1];
         }
-        return this.prependLogsWithWinstonImport(contents);
+        this.options.logger.silly(`Matched 'import { ...ILogsWithWinston... } from "@wizardsoftheweb/logs-with-winston";'`);
+        /* tslint:enable:max-line-length */
+        return "ILogsWithWinston";
     }
 
     /**
-     * Determine how `winston` is being used in the file.
+     * Determine how `LogsWithWinston` is being used in the file.
      *
      * @param  {string} contents
      * File contents to parse
@@ -144,15 +130,15 @@ ${this.options.eol}`,
      * @return {string}
      * The new declaration with `LogsWithWinston`
      */
-    private appendImplements(match: string[], logsWithWinstonUsage: string): string {
+    private appendImplements(match: string[], iLogsWithWinstonUsage: string): string {
         if (typeof match[3] !== "undefined") {
-            if (match[3].indexOf(logsWithWinstonUsage) < 0) {
-                return match[0].replace(match[3], `${match[3]}, ${logsWithWinstonUsage}`);
+            if (match[3].indexOf(iLogsWithWinstonUsage) < 0) {
+                return match[0].replace(match[3], `${match[3]}, ${iLogsWithWinstonUsage}`);
             } else {
                 return match[0];
             }
         }
-        return `${match[2]} implements ${logsWithWinstonUsage}${match[4]}`;
+        return `${match[2]} implements ${iLogsWithWinstonUsage}${match[4]}`;
     }
 
     /**
@@ -165,19 +151,29 @@ ${this.options.eol}`,
      * The decorated contents
      */
     private decorate(contents: string): string {
-        let output = this.findOrImportLogsWithWinston(contents);
+        let output = contents;
         const loggerInstance = this.determineWinstonUsage(contents);
         const logsWithWinston = this.determineLogsWithWinstonUsage(contents);
+        const iLogsWithWinston = this.determineILogsWithWinstonUsage(contents);
         const members = this.generateMembers(loggerInstance);
         const sanitizedMembers = members.replace(/\*/g, "\\*");
         let match: any;
-        DecoratorImplementor.DECLARATION_REGEXP.lastIndex = 0;
+        const declarationRegExp = logsWithWinston === "LogsWithWinston"
+            ? DecoratorImplementor.DECLARATION_REGEXP
+            : new RegExp(
+                DecoratorImplementor.DECLARATION_REGEXP
+                    .toString()
+                    .replace(/^\/([\s\S]*?)\/\w*$/g, "$1")
+                    .replace("LogsWithWinston", logsWithWinston),
+                "gmi",
+            );
+        declarationRegExp.lastIndex = 0;
         /* tslint:disable-next-line:no-conditional-assignment */
-        while (match = DecoratorImplementor.DECLARATION_REGEXP.exec(contents)) {
+        while (match = declarationRegExp.exec(contents)) {
             output = output.replace(
                 match[0],
                 (match[1] || this.options.decorator + this.options.eol)
-                + this.appendImplements(match, loggerInstance)
+                + this.appendImplements(match, iLogsWithWinston)
                 + members,
             )
                 .replace(new RegExp(`${sanitizedMembers}\\s*?${sanitizedMembers}`, "gmi"), members);

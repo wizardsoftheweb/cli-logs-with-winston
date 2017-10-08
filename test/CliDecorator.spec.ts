@@ -27,6 +27,10 @@ const DecoratorImplementor = sinon.stub()
 const files = ["one", "two"];
 const FileResolver = sinon.stub()
     .returns({ files });
+const LogsWithWinstonImportValidator = sinon.stub()
+    .callsFake((input: string) => {
+        return { contents: input };
+    });
 const WinstonImportValidator = sinon.stub()
     .callsFake((input: string) => {
         return { contents: input };
@@ -44,6 +48,10 @@ const CliDecorator = proxyquire("../src/lib/CliDecorator", {
     "./FileResolver": {
         "@noCallThru": true,
         FileResolver,
+    },
+    "./LogsWithWinstonImportValidator": {
+        "@noCallThru": true,
+        LogsWithWinstonImportValidator,
     },
     "./WinstonImportValidator": {
         "@noCallThru": true,
@@ -77,6 +85,7 @@ describe("CliDecorator", (): void => {
             cliDecorator.decorate();
             ClassLoader.should.have.callCount(files.length);
             WinstonImportValidator.should.have.callCount(files.length);
+            LogsWithWinstonImportValidator.should.have.callCount(files.length);
             DecoratorImplementor.should.have.callCount(files.length);
             writeFileSync.should.have.callCount(files.length);
             const iterations = new Array(files.length).fill(0).map((current: number, index: number) => {
@@ -89,6 +98,9 @@ describe("CliDecorator", (): void => {
                 const winstonImportValidatorCall = WinstonImportValidator.getCall(iteration);
                 winstonImportValidatorCall.should.have.been.calledWithNew;
                 winstonImportValidatorCall.should.have.been.calledWithExactly(files[iteration], options);
+                const logsWithWinstonImportValidatorCall = LogsWithWinstonImportValidator.getCall(iteration);
+                logsWithWinstonImportValidatorCall.should.have.been.calledWithNew;
+                logsWithWinstonImportValidatorCall.should.have.been.calledWithExactly(files[iteration], options);
                 const decoratorImplementorCall = DecoratorImplementor.getCall(iteration);
                 decoratorImplementorCall.should.have.been.calledWithNew;
                 decoratorImplementorCall.should.have.been.calledWithExactly(files[iteration], options);

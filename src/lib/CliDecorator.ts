@@ -5,6 +5,7 @@ import { DecoratorImplementor } from "./DecoratorImplementor";
 import { FileResolver } from "./FileResolver";
 import { InheritsCliDecoratorOptions } from "./InheritsCliDecoratorOptions";
 import { ICliDecoratorOptions } from "./interfaces";
+import { LogsWithWinstonImportValidator } from "./LogsWithWinstonImportValidator";
 import { WinstonImportValidator } from "./WinstonImportValidator";
 
 /**
@@ -35,6 +36,7 @@ export class CliDecorator extends InheritsCliDecoratorOptions {
         for (const filename of this.files) {
             let contents = (new ClassLoader(filename, this.options)).contents;
             contents = (new WinstonImportValidator(contents, this.options)).contents;
+            contents = (new LogsWithWinstonImportValidator(contents, this.options)).contents;
             contents = (new DecoratorImplementor(contents, this.options)).contents;
             writeFileSync(filename, contents, "utf-8");
         }
