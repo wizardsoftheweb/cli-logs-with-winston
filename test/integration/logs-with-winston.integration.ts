@@ -66,15 +66,80 @@ describe("Decorating vanilla classes", (): void => {
         });
     });
 
-    // describe("decoration", (): void => {
-    //     it("should decorate each file without error", (): Bluebird<void> => {
-    //         return new Bluebird((resolve, reject) => {
+    describe("decoration", (): void => {
+        it("should decorate each file without error", (): Bluebird<void> => {
+            return new Bluebird((resolve, reject) => {
+                const filenames = shelljs.find(path.join(tmpDir, "src", "*.ts"));
+                const commands: string[] = [];
+                for (const filename of filenames) {
+                    commands.push(`${logsWithWinstonCli} ${filename}`);
+                }
+                resolve(commands);
+            })
+                .each((command: string) => {
+                    return new Bluebird((resolve, reject) => {
+                        return shelljs.exec(
+                            command,
+                            { silent: true },
+                            (code: number, stdout: string, stderror: string) => {
+                                const result = stdout.trim();
+                                if (result.length > 0 || code !== 0) {
+                                    return reject(result);
+                                } else {
+                                    return resolve(result);
+                                }
+                            },
+                        );
+                    });
+                })
+                .then((): void => {
+                    //
+                });
+        }).timeout(20000);
 
-    //         })
-    //         .then((): void => {
+        it("should decorate a new file without error", (): Bluebird<void> => {
+            return new Bluebird((resolve, reject) => {
+                return shelljs.exec(
+                    `${logsWithWinstonCli} src/Whoopsie`,
+                    { silent: true },
+                    (code: number, stdout: string, stderror: string) => {
+                        const result = stdout.trim();
+                        if (result.length > 0 || code !== 0) {
+                            return reject(result);
+                        } else {
+                            return resolve(result);
+                        }
+                    },
+                );
+            })
+            .then(() => {
+                //
+            });
+        });
+    });
 
-    //         })
-    //     })
+    // describe("post-decoration", (): void => {
+    //     beforeEach((): void => {
+    //         dumpDist();
+    //     });
+
+    //     it("should lint without error", (): Bluebird<void> => {
+    //         return lint()
+    //             .then((input: string): void => {
+    //                 input.should.have.lengthOf(0);
+    //             });
+    //     }).timeout(10000);
+
+    //     it("should compile without error", (): Bluebird<void> => {
+    //         return compile()
+    //             .then((input: string): void => {
+    //                 input.should.have.lengthOf(0);
+    //             });
+    //     }).timeout(10000);
+
+    //     after((): void => {
+    //         dumpDist();
+    //     });
     // });
 
     function dumpDist(): void {
