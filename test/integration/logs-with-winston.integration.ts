@@ -21,11 +21,20 @@ const tsNode = path.resolve(path.join(__dirname, "..", "..", "node_modules", ".b
 const tsc = path.resolve(path.join(__dirname, "..", "..", "node_modules", ".bin", "tsc"));
 
 describe("Decorating vanilla classes", (): void => {
-    before((): void => {
-        shelljs.rm("-rf", tmpDir);
-        shelljs.mkdir("-p", path.join(tmpDir, "src"));
-        shelljs.cp(path.join(__dirname, "input", "*.json"), tmpDir);
-        shelljs.cp(path.join(__dirname, "input", "*.ts"), path.join(tmpDir, "src"));
+    before((): Bluebird<void> => {
+        return new Bluebird((resolve, reject) => {
+            shelljs.rm("-rf", tmpDir);
+            shelljs.mkdir("-p", path.join(tmpDir, "src"));
+            const files = shelljs.find(path.join(__dirname, "input"));
+            for (const filename of files) {
+                if (filename.match(/\.json$/i)) {
+                    shelljs.cp(filename, tmpDir);
+                } else {
+                    shelljs.cp(filename, path.join(tmpDir, "src"));
+                }
+            }
+            resolve();
+        });
     });
 
     beforeEach((): void => {
