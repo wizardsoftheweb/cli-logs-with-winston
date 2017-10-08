@@ -1,4 +1,4 @@
-import {LoggerInstance} from "winston";
+import { LoggerInstance } from "winston";
 
 export interface ICliDecoratorOptions {
     decorator: string;
