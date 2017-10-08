@@ -17,13 +17,30 @@ chai.use(sinonChai);
 
 const tmpDir = path.resolve(path.join(__dirname, "..", "..", ".binIntegrationTest"));
 const tsLint = path.resolve(path.join(__dirname, "..", "..", "node_modules", ".bin", "tslint"));
-const tsNode = path.resolve(path.join(__dirname, "..", "..", "node_modules", ".bin", "ts-node"));
 const tsc = path.resolve(path.join(__dirname, "..", "..", "node_modules", ".bin", "tsc"));
-const logsWithWinstonCli = path.resolve(path.join(__dirname, "..", "..", "src", "bin", "logs-with-winston.ts"));
+const dist = path.resolve(path.join(__dirname, "..", "..", "dist"));
+const logsWithWinstonCli = path.resolve(path.join(dist, "bin", "logs-with-winston.js"));
 
 describe("Decorating vanilla classes", (): void => {
-    before((): Bluebird<void> => {
+    before(function(): Bluebird<void> {
+        this.timeout(10000);
         return new Bluebird((resolve, reject) => {
+            shelljs.rm("-rf", dist);
+            return shelljs.exec(
+                "npm run compile:npm",
+                { silent: true },
+                (code: number, stdout: string, stderr: string) => {
+                    const result = stdout.trim();
+                    if (code !== 0) {
+                        console.log(stdout);
+                        console.log(stderr);
+                        return reject(result);
+                    } else {
+                        return resolve(result);
+                    }
+                });
+        })
+        .then(() => {
             shelljs.rm("-rf", tmpDir);
             shelljs.mkdir("-p", path.join(tmpDir, "src"));
             const files = shelljs.find(path.join(__dirname, "input"));
@@ -34,7 +51,7 @@ describe("Decorating vanilla classes", (): void => {
                     shelljs.cp(filename, path.join(tmpDir, "src"));
                 }
             }
-            resolve();
+            return Bluebird.resolve();
         });
     });
 
@@ -81,9 +98,11 @@ describe("Decorating vanilla classes", (): void => {
                         return shelljs.exec(
                             command,
                             { silent: true },
-                            (code: number, stdout: string, stderror: string) => {
+                            (code: number, stdout: string, stderr: string) => {
                                 const result = stdout.trim();
                                 if (result.length > 0 || code !== 0) {
+                                    console.log(stdout);
+                                    console.log(stderr);
                                     return reject(result);
                                 } else {
                                     return resolve(result);
@@ -102,7 +121,7 @@ describe("Decorating vanilla classes", (): void => {
                 return shelljs.exec(
                     `${logsWithWinstonCli} src/Whoopsie`,
                     { silent: true },
-                    (code: number, stdout: string, stderror: string) => {
+                    (code: number, stdout: string, stderr: string) => {
                         const result = stdout.trim();
                         if (result.length > 0 || code !== 0) {
                             return reject(result);
@@ -112,9 +131,9 @@ describe("Decorating vanilla classes", (): void => {
                     },
                 );
             })
-            .then(() => {
-                //
-            });
+                .then(() => {
+                    //
+                });
         });
     });
 
@@ -149,9 +168,10 @@ describe("Decorating vanilla classes", (): void => {
     function lint(): Bluebird<any> {
         return new Bluebird((resolve, reject) => {
             return shelljs.exec(
-                `${tsLint} -c ./tslint.json -p ./tsconfig.json --type-check`,
+                `\
+${tsLint} -c ${path.join(tmpDir, "tslint.json")} -p ${path.join(tmpDir, "tsconfig.json")} --type-check`,
                 // { silent: true },
-                (code: number, stdout: string, stderror: string) => {
+                (code: number, stdout: string, stderr: string) => {
                     const result = stdout.trim();
                     if (result.length > 0 || code !== 0) {
                         console.log(result);
@@ -167,9 +187,9 @@ describe("Decorating vanilla classes", (): void => {
     function compile(): Bluebird<any> {
         return new Bluebird((resolve, reject) => {
             return shelljs.exec(
-                `${tsc} --p ./tsconfig.json`,
+                `${tsc} -p ${path.join(tmpDir, "tsconfig.json")}`,
                 { silent: true },
-                (code: number, stdout: string, stderror: string) => {
+                (code: number, stdout: string, stderr: string) => {
                     const result = stdout.trim();
                     if (result.length > 0 || code !== 0) {
                         return reject(result);
