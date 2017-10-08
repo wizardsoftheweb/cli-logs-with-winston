@@ -49,6 +49,30 @@ contents of file;`;
         });
     });
 
+    describe("findOrInsertLoggerInstanceImport", (): void => {
+        const indent = InheritsCliDecoratorOptions.DEFAULT_INDENT;
+        it("should pass imports through when LoggerInstance is found", (): void => {
+            const imports = `${EOL}\
+${indent}LoggerInstance,${EOL}\
+${indent}Logger,${EOL}\
+`;
+            const predictedOutput = `${EOL}${indent}Logger,${EOL}${indent}LoggerInstance,${EOL}`;
+            const output = (winstonImportValidator as any).findOrInsertLoggerInstanceImport(imports);
+            output.should.equal(predictedOutput);
+        });
+
+        it("should add LoggerInstance when not found", (): void => {
+            const imports = `${EOL}${indent}transports,${EOL}${indent}Logger,${EOL}`;
+            const predictedOutput = `${EOL}\
+${indent}Logger,${EOL}\
+${indent}LoggerInstance,${EOL}\
+${indent}transports,${EOL}\
+`;
+            const output = (winstonImportValidator as any).findOrInsertLoggerInstanceImport(imports);
+            output.should.equal(predictedOutput);
+        });
+    });
+
     afterEach((): void => {
         checkWinstonImportStub.restore();
     });
