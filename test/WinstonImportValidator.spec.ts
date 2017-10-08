@@ -28,7 +28,10 @@ describe("WinstonImportValidator", (): void => {
     const indent = InheritsCliDecoratorOptions.DEFAULT_INDENT;
 
     beforeEach((): void => {
-        findOrCreateWinstonImportStub = sinon.stub(WinstonImportValidator.prototype as any, "findOrCreateWinstonImport");
+        findOrCreateWinstonImportStub = sinon.stub(
+            WinstonImportValidator.prototype as any,
+            "findOrCreateWinstonImport",
+        );
         winstonImportValidator = new WinstonImportValidator(dummyContents, {} as any);
     });
 
@@ -109,7 +112,7 @@ ${indent}transports,${EOL}\
         it("should attempt to insert a LoggerInstance reference when specific imports are found", (): void => {
             const imports = `${EOL}${indent}LoggerInstance,${EOL}${indent}Logger,${EOL}`;
             const contents = `import {${imports}} from "winston";${EOL}file contents;`;
-            const predictedOutput =`\
+            const predictedOutput = `\
 import {${EOL}\
 ${indent}Logger,${EOL}\
 ${indent}LoggerInstance,${EOL}\
