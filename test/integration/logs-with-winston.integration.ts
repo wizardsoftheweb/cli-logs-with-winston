@@ -19,6 +19,7 @@ const tmpDir = path.resolve(path.join(__dirname, "..", "..", ".binIntegrationTes
 const tsLint = path.resolve(path.join(__dirname, "..", "..", "node_modules", ".bin", "tslint"));
 const tsNode = path.resolve(path.join(__dirname, "..", "..", "node_modules", ".bin", "ts-node"));
 const tsc = path.resolve(path.join(__dirname, "..", "..", "node_modules", ".bin", "tsc"));
+const logsWithWinstonCli = path.resolve(path.join(__dirname, "..", "..", "src", "bin", "logs-with-winston.ts"));
 
 describe("Decorating vanilla classes", (): void => {
     before((): Bluebird<void> => {
