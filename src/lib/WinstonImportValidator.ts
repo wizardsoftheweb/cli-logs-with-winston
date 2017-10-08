@@ -53,13 +53,14 @@ ${contents}`;
         let foundLoggerInstance = false;
         const importedClasses = imports
             .split(",")
-            .map((current: string) => {
+            .reduce((accumulator: string[], current: string) => {
                 if (/LoggerInstance/.test(current)) {
                     this.options.logger.silly("Found LoggerInstance import");
                     foundLoggerInstance = true;
                 }
-                return current.trim();
-            });
+                current = current.trim();
+                return current.length > 0 ? [current].concat(accumulator) : accumulator;
+            }, []);
         if (!foundLoggerInstance) {
             this.options.logger.silly("Appending LoggerInstance import");
             importedClasses.push("LoggerInstance");
