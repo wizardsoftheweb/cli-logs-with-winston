@@ -153,23 +153,25 @@ describe("DecoratorImplementor", (): void => {
     });
 
     describe("decorate", (): void => {
-        let findOrImportLogsWithWinstonStub: sinon.SinonStub;
         let determineWinstonUsageStub: sinon.SinonStub;
+        let determineILogsWithWinstonStub: sinon.SinonStub;
+        let determineLogsWithWinstonStub: sinon.SinonStub;
         let generateMembersStub: sinon.SinonStub;
         let appendImplementsStub: sinon.SinonStub;
 
         const defaultWinstonUsage = "LoggerInstance";
+        const defaultILogsWithWinstonUsage = "ILogsWithWinston";
         const defaultLogsWithWinstonUsage = "LogsWithWinston";
         const defaultMembers = `${EOL}/* ignore */${EOL}members${EOL}/* ignore */${EOL}`;
 
         beforeEach((): void => {
             decorateStub.restore();
-            findOrImportLogsWithWinstonStub = sinon.stub(decoratorImplementor as any, "findOrImportLogsWithWinston");
-            findOrImportLogsWithWinstonStub.callsFake((input: string): string => {
-                return `import LogsWithWinston;${EOL}${EOL}${input}`;
-            });
             determineWinstonUsageStub = sinon.stub(decoratorImplementor as any, "determineWinstonUsage");
             determineWinstonUsageStub.returns(defaultWinstonUsage);
+            determineILogsWithWinstonStub = sinon.stub(decoratorImplementor as any, "determineILogsWithWinstonUsage");
+            determineILogsWithWinstonStub.returns(defaultILogsWithWinstonUsage);
+            determineLogsWithWinstonStub = sinon.stub(decoratorImplementor as any, "determineLogsWithWinstonUsage");
+            determineLogsWithWinstonStub.returns(defaultLogsWithWinstonUsage);
             generateMembersStub = sinon.stub(decoratorImplementor as any, "generateMembers");
             generateMembersStub.returns(defaultMembers);
             appendImplementsStub = sinon.stub(decoratorImplementor as any, "appendImplements");
@@ -202,14 +204,26 @@ export class SomeClass implements LogsWithWinston {${EOL}\
 /* ignore */${EOL}\
 members${EOL}\
 /* ignore */${EOL}`;
-            findOrImportLogsWithWinstonStub.callsFake((input: string): string => {
-                return input;
-            });
             appendImplementsStub.returns(`export class SomeClass implements ${defaultLogsWithWinstonUsage} {`);
             const output = (decoratorImplementor as any).decorate(predictedOutput);
             output.should.equal(predictedOutput);
         });
 
+        it("should redecorate decorated classes with non-standard LogsWithWinston usage", (): void => {
+            const usage = "WeirdLogsWithWinston";
+            determineLogsWithWinstonStub.returns(usage);
+            const predictedOutput = `\
+import { LogsWithWinston } from "@wizardsoftheweb/logs-with-winston";${EOL}\
+${EOL}\
+@${usage}()${EOL}\
+export class SomeClass implements LogsWithWinston {${EOL}\
+/* ignore */${EOL}\
+members${EOL}\
+/* ignore */${EOL}`;
+            appendImplementsStub.returns(`export class SomeClass implements ${defaultLogsWithWinstonUsage} {`);
+            const output = (decoratorImplementor as any).decorate(predictedOutput);
+            output.should.equal(predictedOutput);
+        });
     });
 
     afterEach((): void => {

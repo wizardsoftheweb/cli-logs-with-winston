@@ -167,9 +167,9 @@ whoamiWinston: string;
                     .replace("LogsWithWinston", logsWithWinston),
                 "gmi",
             );
-        DecoratorImplementor.DECLARATION_REGEXP.lastIndex = 0;
+        declarationRegExp.lastIndex = 0;
         /* tslint:disable-next-line:no-conditional-assignment */
-        while (match = DecoratorImplementor.DECLARATION_REGEXP.exec(contents)) {
+        while (match = declarationRegExp.exec(contents)) {
             output = output.replace(
                 match[0],
                 (match[1] || this.options.decorator + this.options.eol)
