@@ -108,7 +108,7 @@ describe("FileResolver", (): void => {
         const extensionRegExp = new RegExp(InheritsCliDecoratorOptions.DEFAULT_EXTENSION + "$");
 
         before((): void => {
-            cwd = process.cwd();
+            cwd = process.cwd;
             process.cwd = (): string => {
                 return "/current/directory";
             };

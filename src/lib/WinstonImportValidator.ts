@@ -20,7 +20,7 @@ export class WinstonImportValidator extends InheritsCliDecoratorOptions {
      */
     public constructor(contents: string, options: ICliDecoratorOptions) {
         super(options);
-        this.contents = this.checkWinstonImport(contents);
+        this.contents = this.findOrCreateWinstonImport(contents);
     }
 
     /**
@@ -81,7 +81,7 @@ ${this.options.indent}${importedClasses.join("," + this.options.eol + this.optio
      * @return {string}
      * Contents with the proper imports
      */
-    private checkWinstonImport(contents: string): string {
+    private findOrCreateWinstonImport(contents: string): string {
         this.options.logger.silly("Checking for winston import");
         if (contents.match(/^\s*import[\s\S]*?['"]winston['"];\s*$/gmi)) {
             this.options.logger.silly("Found winston import");
