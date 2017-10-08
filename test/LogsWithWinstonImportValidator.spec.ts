@@ -19,7 +19,7 @@ const LogsWithWinstonImportValidator = proxyquire(
     {},
 ).LogsWithWinstonImportValidator;
 
-describe("", (): void => {
+describe("LogsWithWinstonImportValidator", (): void => {
     let findOrCreateLogsWithWinstonImportStub: sinon.SinonStub;
     let logsWithWinstonImportValidator: any;
 
