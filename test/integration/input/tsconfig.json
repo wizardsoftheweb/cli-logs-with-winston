@@ -8,9 +8,9 @@
     "emitDecoratorMetadata": true,
     "inlineSourceMap": true,
     "declaration": true,
-    "outDir": "dist"
+    "outDir": "./dist"
   },
   "include": [
-    "./*"
+    "./src/*"
   ]
 }
