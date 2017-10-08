@@ -83,7 +83,7 @@ ${this.options.indent}${importedClasses.join("," + this.options.eol + this.optio
      */
     private checkWinstonImport(contents: string): string {
         this.options.logger.silly("Checking for winston import");
-        if (contents.match(/^\s*import[\s\S]*?['"]winston['"];\s*$/gyi)) {
+        if (contents.match(/^\s*import[\s\S]*?['"]winston['"];\s*$/gmi)) {
             this.options.logger.silly("Found winston import");
             const importRegExp = /^\s*import\s*(\{([^\}]+)\}|\* as (\w+))\s*from "winston";$/gmi;
             const match: any = importRegExp.exec(contents);

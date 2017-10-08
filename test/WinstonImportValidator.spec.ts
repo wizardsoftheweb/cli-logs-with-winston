@@ -4,7 +4,7 @@
 import * as chai from "chai";
 // Needed for describe, it, etc.
 import { } from "mocha";
-import {EOL} from "os";
+import { EOL } from "os";
 import * as proxyquire from "proxyquire";
 import * as sinon from "sinon";
 import * as sinonChai from "sinon-chai";
@@ -24,6 +24,8 @@ describe("WinstonImportValidator", (): void => {
     let winstonImportValidator: any;
 
     const dummyContents = "qqq";
+
+    const indent = InheritsCliDecoratorOptions.DEFAULT_INDENT;
 
     beforeEach((): void => {
         checkWinstonImportStub = sinon.stub(WinstonImportValidator.prototype as any, "checkWinstonImport");
@@ -50,7 +52,6 @@ contents of file;`;
     });
 
     describe("findOrInsertLoggerInstanceImport", (): void => {
-        const indent = InheritsCliDecoratorOptions.DEFAULT_INDENT;
         it("should pass imports through when LoggerInstance is found", (): void => {
             const imports = `${EOL}\
 ${indent}LoggerInstance,${EOL}\
@@ -69,6 +70,55 @@ ${indent}LoggerInstance,${EOL}\
 ${indent}transports,${EOL}\
 `;
             const output = (winstonImportValidator as any).findOrInsertLoggerInstanceImport(imports);
+            output.should.equal(predictedOutput);
+        });
+    });
+
+    describe("checkWinstonImport", (): void => {
+        let findOrInsertLoggerInstanceImportStub: sinon.SinonStub;
+        let createWinstonImportStub: sinon.SinonStub;
+
+        const defaultReplacedImports = "qqq";
+
+        beforeEach((): void => {
+            checkWinstonImportStub.restore();
+            findOrInsertLoggerInstanceImportStub = sinon.stub(
+                winstonImportValidator as any,
+                "findOrInsertLoggerInstanceImport",
+            );
+            findOrInsertLoggerInstanceImportStub.returns(`${EOL}${indent}Logger,${EOL}${indent}LoggerInstance,${EOL}`);
+            createWinstonImportStub = sinon.stub(winstonImportValidator as any, "createWinstonImport");
+        });
+
+        it("should create an import when one is not found", (): void => {
+            const contents = "file contents;";
+            (winstonImportValidator as any).checkWinstonImport(contents);
+            findOrInsertLoggerInstanceImportStub.should.not.have.been.called;
+            createWinstonImportStub.should.have.been.calledOnce;
+            createWinstonImportStub.should.have.been.calledWithExactly(contents);
+        });
+
+        it("should do nothing when a glob import is found", (): void => {
+            const contents = `import * as winston from "winston";${EOL}file contents;`;
+            const output = (winstonImportValidator as any).checkWinstonImport(contents);
+            findOrInsertLoggerInstanceImportStub.should.not.have.been.called;
+            createWinstonImportStub.should.not.have.been.called;
+            output.should.equal(contents);
+        });
+
+        it("should attempt to insert a LoggerInstance reference when specific imports are found", (): void => {
+            const imports = `${EOL}${indent}LoggerInstance,${EOL}${indent}Logger,${EOL}`;
+            const contents = `import {${imports}} from "winston";${EOL}file contents;`;
+            const predictedOutput =`\
+import {${EOL}\
+${indent}Logger,${EOL}\
+${indent}LoggerInstance,${EOL}\
+} from "winston";${EOL}\
+file contents;`;
+            const output = (winstonImportValidator as any).checkWinstonImport(contents);
+            findOrInsertLoggerInstanceImportStub.should.have.been.calledOnce;
+            findOrInsertLoggerInstanceImportStub.should.have.been.calledWithExactly(imports);
+            createWinstonImportStub.should.not.have.been.called;
             output.should.equal(predictedOutput);
         });
     });
