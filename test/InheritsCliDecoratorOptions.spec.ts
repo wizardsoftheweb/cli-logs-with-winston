@@ -44,6 +44,7 @@ describe("InheritsCliDecoratorOptions", (): void => {
 
         it("should assign defaults without input", (): void => {
             const options: ICliDecoratorOptions = (inheritsCliDecoratorOptionsInstance as any).options as any;
+            options.decorator.should.deep.equal(InheritsCliDecoratorOptions.DEFAULT_DECORATOR);
             options.eol.should.deep.equal(InheritsCliDecoratorOptions.DEFAULT_EOL);
             options.extension.should.deep.equal(InheritsCliDecoratorOptions.DEFAULT_EXTENSION);
             options.indent.should.deep.equal(InheritsCliDecoratorOptions.DEFAULT_INDENT);
@@ -53,7 +54,7 @@ describe("InheritsCliDecoratorOptions", (): void => {
         });
 
         it("should assign specific options when passed in", (): void => {
-            const specificOptions = ["eol", "extension", "indent", "linter", "logger"];
+            const specificOptions = ["decorator", "eol", "extension", "indent", "linter", "logger"];
             const dummyValue = "qqq";
             for (const option of specificOptions) {
                 const input = {} as any;
