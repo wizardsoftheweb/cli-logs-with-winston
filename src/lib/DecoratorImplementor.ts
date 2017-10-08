@@ -158,6 +158,15 @@ whoamiWinston: string;
         const members = this.generateMembers(loggerInstance);
         const sanitizedMembers = members.replace(/\*/g, "\\*");
         let match: any;
+        const declarationRegExp = logsWithWinston === "LogsWithWinston"
+            ? DecoratorImplementor.DECLARATION_REGEXP
+            : new RegExp(
+                DecoratorImplementor.DECLARATION_REGEXP
+                    .toString()
+                    .replace(/^\/([\s\S]*?)\/\w*$/g, "$1")
+                    .replace("LogsWithWinston", logsWithWinston),
+                "gmi",
+            );
         DecoratorImplementor.DECLARATION_REGEXP.lastIndex = 0;
         /* tslint:disable-next-line:no-conditional-assignment */
         while (match = DecoratorImplementor.DECLARATION_REGEXP.exec(contents)) {
