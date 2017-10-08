@@ -11,7 +11,7 @@ import { ICliDecoratorOptions } from "./interfaces";
 export class DecoratorImplementor extends InheritsCliDecoratorOptions {
     /* tslint:disable-next-line:max-line-length */
     /** @type {RegExp} Class declaration regex */
-    public static DECLARATION_REGEXP = /^((?:export)?\s*class\s+(?:\w+)(?:\s+extends\s+(?:[\w ,]))?(?:\s+implements\s+([\w ,]))?)(\s+\{)?$/gi;
+    public static DECLARATION_REGEXP = /(@LogsWithWinston[\s\S]*?)?^((?:export)?\s*class\s+(?:\w+)(?:\s+extends\s+(?:[\w ,]))?(?:\s+implements\s+([\w ,]))?)(\s+\{)?$/gmi;
     public contents: string;
 
     /**
@@ -119,9 +119,13 @@ ${this.options.eol}`,
      */
     private appendImplements(match: string[]): string {
         if (typeof match[2] !== "undefined") {
-            return match[0].replace(match[2], `${match[2]}, LogsWithWinston`);
+            if (match[2].indexOf("LogsWithWinston") < 0) {
+                return match[0].replace(match[3], `${match[3]}, LogsWithWinston`);
+            } else {
+                return match[0];
+            }
         }
-        return `${match[1]} implements LogsWithWinston ${match[3]}`;
+        return `${match[2]} implements LogsWithWinston ${match[4]}`;
     }
 
     /**
@@ -139,13 +143,15 @@ ${this.options.eol}`,
         let match: any;
         /* tslint:disable-next-line:no-conditional-assignment */
         while (match = DecoratorImplementor.DECLARATION_REGEXP.exec(contents)) {
-            output = output.replace(
-                match[0],
-                this.options.decorator
-                + this.options.eol
-                + this.appendImplements(match)
-                + this.generateMembers(loggerInstance),
-            );
+            if (typeof match[1] !== "undefined") {
+                output = output.replace(
+                    match[0],
+                    this.options.decorator
+                    + this.options.eol
+                    + this.appendImplements(match)
+                    + this.generateMembers(loggerInstance),
+                );
+            }
         }
         return contents;
     }
