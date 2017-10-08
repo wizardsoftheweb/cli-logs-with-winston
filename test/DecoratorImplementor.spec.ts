@@ -19,9 +19,18 @@ describe("DecoratorImplementor", (): void => {
     let decorateStub: sinon.SinonStub;
     let decoratorImplementor: any;
 
+    const dummyContents = "qqq";
+
     beforeEach((): void => {
         decorateStub = sinon.stub(DecoratorImplementor.prototype as any, "decorate");
-        decoratorImplementor = new DecoratorImplementor({} as any);
+        decoratorImplementor = new DecoratorImplementor(dummyContents, {} as any);
+    });
+
+    describe("constructor", (): void => {
+        it("should load decorate the given file", (): void => {
+            decorateStub.should.have.been.calledOnce;
+            decorateStub.should.have.been.calledWithExactly(dummyContents);
+        });
     });
 
     afterEach((): void => {
