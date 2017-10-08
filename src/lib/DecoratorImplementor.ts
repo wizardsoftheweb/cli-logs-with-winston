@@ -12,6 +12,7 @@ export class DecoratorImplementor extends InheritsCliDecoratorOptions {
     /* tslint:disable-next-line:max-line-length */
     /** @type {RegExp} Class declaration regex */
     public static DECLARATION_REGEXP = /(@LogsWithWinston[\s\S]*?)?^((?:export)?\s*?class\s+(?:\w+)(?:\s+extends\s+(?:[\w ,]+))?(?:\s+implements\s+([\w ,]+))?)(\s+\{)?$/gmi;
+    /** @type {string} The contents of the file to decorate */
     public contents: string;
 
     /**
