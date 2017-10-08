@@ -73,26 +73,49 @@ describe("DecoratorImplementor", (): void => {
         });
     });
 
-    describe("determineLogsWithWinstonUsage", (): void => {
-        it("should find '* as LogsWithWinston'", (): void => {
-            const loggerInstance = (decoratorImplementor as any).determineLogsWithWinstonUsage(
+    describe("determineILogsWithWinstonUsage", (): void => {
+        it("should find '* as ILogsWithWinston'", (): void => {
+            const iLogsWithWinstonInstance = (decoratorImplementor as any).determineILogsWithWinstonUsage(
                 "import * as LogsWithWinston from '@wizardsoftheweb/logs-with-winston';",
             );
-            loggerInstance.should.equal("LogsWithWinston.LogsWithWinston");
+            iLogsWithWinstonInstance.should.equal("LogsWithWinston.ILogsWithWinston");
+        });
+
+        it("should find '{ ILogsWithWinston as SomethingElse }'", (): void => {
+            const iLogsWithWinstonInstance = (decoratorImplementor as any).determineILogsWithWinstonUsage(
+                "import { ILogsWithWinston as SomethingElse } from '@wizardsoftheweb/logs-with-winston';",
+            );
+            iLogsWithWinstonInstance.should.equal("SomethingElse");
+        });
+
+        it("should assume ILogsWithWinston otherwise", (): void => {
+            const iLogsWithWinstonInstance = (decoratorImplementor as any).determineILogsWithWinstonUsage(
+                "import { ILogsWithWinston } from '@wizardsoftheweb/logs-with-winston';",
+            );
+            iLogsWithWinstonInstance.should.equal("ILogsWithWinston");
+        });
+    });
+
+    describe("determineLogsWithWinstonUsage", (): void => {
+        it("should find '* as LogsWithWinston'", (): void => {
+            const logsWithWinstonInstance = (decoratorImplementor as any).determineLogsWithWinstonUsage(
+                "import * as LogsWithWinston from '@wizardsoftheweb/logs-with-winston';",
+            );
+            logsWithWinstonInstance.should.equal("LogsWithWinston.LogsWithWinston");
         });
 
         it("should find '{ LogsWithWinston as SomethingElse }'", (): void => {
-            const loggerInstance = (decoratorImplementor as any).determineLogsWithWinstonUsage(
+            const logsWithWinstonInstance = (decoratorImplementor as any).determineLogsWithWinstonUsage(
                 "import { LogsWithWinston as SomethingElse } from '@wizardsoftheweb/logs-with-winston';",
             );
-            loggerInstance.should.equal("SomethingElse");
+            logsWithWinstonInstance.should.equal("SomethingElse");
         });
 
         it("should assume LogsWithWinston otherwise", (): void => {
-            const loggerInstance = (decoratorImplementor as any).determineLogsWithWinstonUsage(
+            const logsWithWinstonInstance = (decoratorImplementor as any).determineLogsWithWinstonUsage(
                 "import { LogsWithWinston } from '@wizardsoftheweb/logs-with-winston';",
             );
-            loggerInstance.should.equal("LogsWithWinston");
+            logsWithWinstonInstance.should.equal("LogsWithWinston");
         });
     });
 
