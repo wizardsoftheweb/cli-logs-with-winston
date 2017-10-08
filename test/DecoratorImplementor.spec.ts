@@ -73,49 +73,6 @@ describe("DecoratorImplementor", (): void => {
         });
     });
 
-    describe("prependLogsWithWinstonImport", (): void => {
-        const predictedOutput = `\
-import one;
-import two;${EOL}\
-import three;${EOL}\
-${EOL}\
-import { LogsWithWinston } from "@wizardsoftheweb/logs-with-winston";${EOL}\
-${EOL}\
-after imports;${EOL}`;
-        it("should add LogsWithWinston import after last import", (): void => {
-            const output = (decoratorImplementor as any).prependLogsWithWinstonImport(`\
-import one;
-import two;
-import three;
-
-after imports;
-`);
-            output.should.equal(predictedOutput);
-        });
-    });
-
-    describe("findOrImportLogsWithWinston", (): void => {
-        let prependLogsWithWinstonImportStub: sinon.SinonStub;
-
-        beforeEach((): void => {
-            prependLogsWithWinstonImportStub = sinon.stub(decoratorImplementor as any, "prependLogsWithWinstonImport");
-        });
-
-        it("should pass through contents with import already exists", (): void => {
-            const contents = "import { LogsWithWinston } from '@wizardsoftheweb/logs-with-winston';";
-            const output = (decoratorImplementor as any).findOrImportLogsWithWinston(contents);
-            output.should.equal(contents);
-            prependLogsWithWinstonImportStub.should.not.have.been.called;
-        });
-
-        it("should prepend import when not found", (): void => {
-            const contents = "import { NotLogs } from 'not-the-right-package';";
-            const output = (decoratorImplementor as any).findOrImportLogsWithWinston(contents);
-            prependLogsWithWinstonImportStub.should.have.been.calledOnce;
-            prependLogsWithWinstonImportStub.should.have.been.calledWithExactly(contents);
-        });
-    });
-
     describe("determineLogsWithWinstonUsage", (): void => {
         it("should find '* as LogsWithWinston'", (): void => {
             const loggerInstance = (decoratorImplementor as any).determineLogsWithWinstonUsage(
@@ -175,7 +132,6 @@ after imports;
     describe("decorate", (): void => {
         let findOrImportLogsWithWinstonStub: sinon.SinonStub;
         let determineWinstonUsageStub: sinon.SinonStub;
-        let determineLogsWithWinstonUsage: sinon.SinonStub;
         let generateMembersStub: sinon.SinonStub;
         let appendImplementsStub: sinon.SinonStub;
 
@@ -191,17 +147,18 @@ after imports;
             });
             determineWinstonUsageStub = sinon.stub(decoratorImplementor as any, "determineWinstonUsage");
             determineWinstonUsageStub.returns(defaultWinstonUsage);
-            determineLogsWithWinstonUsage = sinon.stub(decoratorImplementor as any, "determineLogsWithWinstonUsage");
-            determineLogsWithWinstonUsage.returns(defaultLogsWithWinstonUsage);
             generateMembersStub = sinon.stub(decoratorImplementor as any, "generateMembers");
             generateMembersStub.returns(defaultMembers);
             appendImplementsStub = sinon.stub(decoratorImplementor as any, "appendImplements");
         });
 
         it("should decorate vanilla classes", (): void => {
-            const contents = "export class SomeClass {";
+            const contents = `\
+import { LogsWithWinston } from "@wizardsoftheweb/logs-with-winston";${EOL}\
+${EOL}\
+export class SomeClass {`;
             const predictedOutput = `\
-import LogsWithWinston;${EOL}\
+import { LogsWithWinston } from "@wizardsoftheweb/logs-with-winston";${EOL}\
 ${EOL}\
 @LogsWithWinston()${EOL}\
 export class SomeClass implements LogsWithWinston {${EOL}\
@@ -215,7 +172,7 @@ members${EOL}\
 
         it("should redecorate decorated classes", (): void => {
             const predictedOutput = `\
-import LogsWithWinston;${EOL}\
+import { LogsWithWinston } from "@wizardsoftheweb/logs-with-winston";${EOL}\
 ${EOL}\
 @LogsWithWinston()${EOL}\
 export class SomeClass implements LogsWithWinston {${EOL}\
