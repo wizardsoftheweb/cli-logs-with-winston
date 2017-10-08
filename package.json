@@ -18,7 +18,8 @@
     "postpublish": "ts-node build-examples",
     "test": "cross-env NODE_ENV=test nyc mocha",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
-    "compile:npm": "tsc --p tsconfig.npm.json",
+    "compile:declarations": "tsc -p tsconfig.declarations.json",
+    "compile:npm": "tsc -p tsconfig.npm.json",
     "lint": "tslint -c ./tslint.json -p ./tsconfig.npm.json --type-check src/**/*.ts"
   },
   "author": "CJ Harries <cj@wizardsoftheweb.pro> (https://wizardsoftheweb.pro/)",

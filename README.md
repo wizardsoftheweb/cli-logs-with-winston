@@ -2,6 +2,10 @@
 
 [![Build Status](https://travis-ci.org/wizardsoftheweb/cli-logs-with-winston.svg?branch=master)](https://travis-ci.org/wizardsoftheweb/cli-logs-with-winston) [![Coverage Status](https://coveralls.io/repos/github/wizardsoftheweb/cli-logs-with-winston/badge.svg?branch=master)](https://coveralls.io/github/wizardsoftheweb/cli-logs-with-winston?branch=master)
 
+This is a QOL dev addition to [`@wizardsoftheweb/logs-with-winston`](https://www.npmjs.com/package/@wizardsoftheweb/logs-with-winston). I'm trying to keep the decorator itself as slim as possible. This package add a `.bin` script, which inserts all the necessary modifications to decorate existing files and generates pre-decorated skeletons for non-existent files.
+
+It's really just for dev use, i.e. be nice and `--save-dev`.
+
 <!-- MarkdownTOC -->
 
 - [Installation](#installation)
@@ -24,13 +28,16 @@
 ## Installation
 
 ```bash
-npm install @wizardsoftheweb/cli-logs-with-winston
+npm install --save-dev @wizardsoftheweb/cli-logs-with-winston
 ```
 
 ## Tests
 
+In the interest of keeping the final package small, none of the tests are installed. Instead, you'll need to clone the repo.
 ```bash
-npm install git+https://github.com/wizardsoftheweb/cli-logs-with-winston
+git clone https://github.com/wizardsoftheweb/cli-logs-with-winston.git
+cd cli-logs-with-winston
+npm install
 npm t
 ```
 The [integration tests](https://github.com/wizardsoftheweb/cli-logs-with-winston/tree/master/test/integration) run incredibly slow (~20secs per), so you might not want to bolt those into anything you're doing.
