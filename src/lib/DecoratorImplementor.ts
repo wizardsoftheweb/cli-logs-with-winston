@@ -139,7 +139,7 @@ whoamiWinston: string;
             output = output.replace(
                 match[0],
                 (match[1] || this.options.decorator + this.options.eol)
-                + this.appendImplements(match, loggerInstance)
+                + this.appendImplements(match, logsWithWinston)
                 + members,
             )
                 .replace(new RegExp(`${sanitizedMembers}\\s*?${sanitizedMembers}`, "gmi"), members);
