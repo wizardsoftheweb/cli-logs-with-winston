@@ -117,15 +117,15 @@ ${this.options.eol}`,
      * @return {string}
      * The new declaration with `LogsWithWinston`
      */
-    private appendImplements(match: string[]): string {
+    private appendImplements(match: string[], winstonUsage: string): string {
         if (typeof match[2] !== "undefined") {
-            if (match[2].indexOf("LogsWithWinston") < 0) {
-                return match[0].replace(match[3], `${match[3]}, LogsWithWinston`);
+            if (match[2].indexOf(winstonUsage) < 0) {
+                return match[0].replace(match[3], `${match[3]}, ${winstonUsage}`);
             } else {
                 return match[0];
             }
         }
-        return `${match[2]} implements LogsWithWinston ${match[4]}`;
+        return `${match[2]} implements ${winstonUsage} ${match[4]}`;
     }
 
     /**
@@ -143,15 +143,13 @@ ${this.options.eol}`,
         let match: any;
         /* tslint:disable-next-line:no-conditional-assignment */
         while (match = DecoratorImplementor.DECLARATION_REGEXP.exec(contents)) {
-            if (typeof match[1] !== "undefined") {
-                output = output.replace(
-                    match[0],
-                    this.options.decorator
-                    + this.options.eol
-                    + this.appendImplements(match)
-                    + this.generateMembers(loggerInstance),
-                );
-            }
+            output = output.replace(
+                match[0],
+                (match[1] || this.options.decorator)
+                + this.options.eol
+                + this.appendImplements(match, loggerInstance)
+                + this.generateMembers(loggerInstance),
+            );
         }
         return contents;
     }
