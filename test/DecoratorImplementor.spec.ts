@@ -139,33 +139,38 @@ after imports;
         });
     });
 
-    // describe("appendImplements", (): void => {
-    //     const regExp = DecoratorImplementor.DECLARATION_REGEXP;
-    //     const winstonUsage = "LoggerInstance";
+    describe("appendImplements", (): void => {
+        let regExp: RegExp;
+        const logsWithWinstonUsage = "LogsWithWinston";
 
-    //     it("should append LogsWithWinston to implemented classes when not found", (): void => {
-    //         const contents = `export class SomeClass implements SomeInterface {${EOL}`;
-    //         const predictedOutput = "export class SomeClass implements SomeInterface, LogsWithWinston {";
-    //         const match = regExp.exec(contents);
-    //         const output = (decoratorImplementor as any).appendImplements(match, winstonUsage);
-    //         output.should.equal(predictedOutput);
-    //     });
+        beforeEach((): void => {
+            regExp = DecoratorImplementor.DECLARATION_REGEXP;
+            regExp.lastIndex = 0;
+        });
 
-    //     it("should add implements on vanilla classes", (): void => {
-    //         const contents = "export class SomeClass {";
-    //         const predictedOutput = "export class SomeClass implements LogsWithWinston {";
-    //         const match = regExp.exec(contents);
-    //         const output = (decoratorImplementor as any).appendImplements(match, winstonUsage);
-    //         output.should.equal(predictedOutput);
-    //     });
+        it("should append LogsWithWinston to implemented classes when not found", (): void => {
+            const contents = `export class SomeClass implements SomeInterface {${EOL}`;
+            const predictedOutput = "export class SomeClass implements SomeInterface, LogsWithWinston {";
+            const match = regExp.exec(contents);
+            const output = (decoratorImplementor as any).appendImplements(match, logsWithWinstonUsage);
+            output.should.equal(predictedOutput);
+        });
 
-    //     it("should do nothing when class implements LogsWithWinston already", (): void => {
-    //         const contents = "export class SomeClass implements LogsWithWinston {";
-    //         const match = regExp.exec(contents);
-    //         const output = (decoratorImplementor as any).appendImplements(match, winstonUsage);
-    //         output.should.equal(contents);
-    //     });
-    // });
+        it("should add implements on vanilla classes", (): void => {
+            const contents = "export class SomeClass {";
+            const predictedOutput = "export class SomeClass implements LogsWithWinston {";
+            const match = regExp.exec(contents);
+            const output = (decoratorImplementor as any).appendImplements(match, logsWithWinstonUsage);
+            output.should.equal(predictedOutput);
+        });
+
+        it("should do nothing when class implements LogsWithWinston already", (): void => {
+            const contents = "export class SomeClass implements LogsWithWinston {";
+            const match = regExp.exec(contents);
+            const output = (decoratorImplementor as any).appendImplements(match, logsWithWinstonUsage);
+            output.should.equal(contents);
+        });
+    });
 
     afterEach((): void => {
         decorateStub.restore();

@@ -11,7 +11,7 @@ import { ICliDecoratorOptions } from "./interfaces";
 export class DecoratorImplementor extends InheritsCliDecoratorOptions {
     /* tslint:disable-next-line:max-line-length */
     /** @type {RegExp} Class declaration regex */
-    public static DECLARATION_REGEXP = /(@LogsWithWinston[\s\S]*?)?^((?:export)?\s*class\s+(?:\w+)(?:\s+extends\s+(?:[\w ,]+))?(?:\s+implements\s+([\w ,]+))?)(\s+\{)?$/gmi;
+    public static DECLARATION_REGEXP = /(@LogsWithWinston[\s\S]*?)?^((?:export)?\s*?class\s+(?:\w+)(?:\s+extends\s+(?:[\w ,]+))?(?:\s+implements\s+([\w ,]+))?)(\s+\{)?$/gmi;
     public contents: string;
 
     /**
@@ -144,14 +144,14 @@ ${this.options.eol}`,
      * The new declaration with `LogsWithWinston`
      */
     private appendImplements(match: string[], logsWithWinstonUsage: string): string {
-        if (typeof match[2] !== "undefined") {
-            if (match[2].indexOf(logsWithWinstonUsage) < 0) {
+        if (typeof match[3] !== "undefined") {
+            if (match[3].indexOf(logsWithWinstonUsage) < 0) {
                 return match[0].replace(match[3], `${match[3]}, ${logsWithWinstonUsage}`);
             } else {
                 return match[0];
             }
         }
-        return `${match[2]} implements ${logsWithWinstonUsage} ${match[4]}`;
+        return `${match[2]} implements ${logsWithWinstonUsage}${match[4]}`;
     }
 
     /**
