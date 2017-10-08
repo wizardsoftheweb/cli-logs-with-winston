@@ -46,6 +46,10 @@ shelljs.sed(
     "env node",
     path.join(__dirname, "dist", "bin", "*.js"),
 );
+const filenames = shelljs.find(path.join(__dirname, "dist", "bin", "*.js"));
+for (const filename of filenames) {
+    shelljs.mv(filename, filename.replace(/\.js$/, ""));
+}
 
 logger.info("Starting declaration file bundle");
 
