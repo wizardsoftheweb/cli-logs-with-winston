@@ -3,6 +3,7 @@
 /* tslint:disable:no-unused-expression */
 import * as Bluebird from "bluebird";
 import * as chai from "chai";
+import * as fs from "fs";
 // Needed for describe, it, etc.
 import { } from "mocha";
 import { EOL } from "os";
@@ -21,9 +22,17 @@ const tsc = path.resolve(path.join(__dirname, "..", "..", "node_modules", ".bin"
 const dist = path.resolve(path.join(__dirname, "..", "..", "dist"));
 const logsWithWinstonCli = path.resolve(path.join(dist, "bin", "logs-with-winston.js"));
 
-describe("Decorating vanilla classes", (): void => {
-    before(function(): Bluebird<void> {
-        this.timeout(10000);
+const importPossibilites = [
+    `import * as winston from "winston";`,
+    `import { LoggerInstance } from "winston";`,
+    `import { Logger } from "winston";`,
+    `import { LoggerInstance as SomethingElse } from "winston";`,
+];
+
+describe("Decorating classes with winston imports", function(): void {
+    this.timeout(20000);
+
+    before((): Bluebird<void> => {
         return new Bluebird((resolve, reject) => {
             shelljs.rm("-rf", dist);
             return shelljs.exec(
@@ -40,19 +49,38 @@ describe("Decorating vanilla classes", (): void => {
                     }
                 });
         })
-        .then(() => {
-            shelljs.rm("-rf", tmpDir);
-            shelljs.mkdir("-p", path.join(tmpDir, "src"));
-            const files = shelljs.find(path.join(__dirname, "input"));
-            for (const filename of files) {
-                if (filename.match(/\.json$/i)) {
-                    shelljs.cp(filename, tmpDir);
-                } else if (filename.match(/\.ts$/i)) {
-                    shelljs.cp(filename, path.join(tmpDir, "src"));
+            .then((): Bluebird<void> => {
+                shelljs.chmod("+x", logsWithWinstonCli);
+                return Bluebird.resolve();
+            })
+            .then((): Bluebird<void> => {
+                shelljs.rm("-rf", tmpDir);
+                shelljs.mkdir("-p", path.join(tmpDir, "src"));
+                const files = shelljs.find(path.join(__dirname, "input"));
+                for (const filename of files) {
+                    if (filename.match(/\.json$/i)) {
+                        shelljs.cp(filename, tmpDir);
+                    } else if (filename.match(/\.ts$/i)) {
+                        shelljs.cp(filename, path.join(tmpDir, "src"));
+                    }
                 }
-            }
-            return Bluebird.resolve();
-        });
+                return Bluebird.resolve();
+            })
+            .then((): void => {
+                const files = shelljs.find(path.join(tmpDir, "src", "*.ts"));
+                let patternIndex = 0;
+                for (const filename of files) {
+                    fs.writeFileSync(
+                        filename,
+                        importPossibilites[patternIndex]
+                        + EOL
+                        + fs.readFileSync(filename, "utf-8"),
+                        "utf-8",
+                    );
+                    patternIndex++;
+                    patternIndex = patternIndex % importPossibilites.length;
+                }
+            });
     });
 
     beforeEach((): void => {
@@ -159,6 +187,10 @@ describe("Decorating vanilla classes", (): void => {
         after((): void => {
             dumpDist();
         });
+    });
+
+    after((): void => {
+        shelljs.rm("-rf", tmpDir);
     });
 
     function dumpDist(): void {

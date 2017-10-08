@@ -82,7 +82,7 @@ whoamiWinston: string;
      */
     private determineILogsWithWinstonUsage(contents: string): string {
         /* tslint:disable:max-line-length */
-        const importRegExp = /^\s*import\s*(?:\{[\s\S]*?(?:ILogsWithWinston(?:\s+as\s+(\w*))?)[\s\S]*?\}|\* as (\w+))\s*from ['"]@wizardsoftheweb\/logs-with-winston['"];$/gmi;
+        const importRegExp = /^\s*import\s*(?:\{[\s\S]*?(?:\bILogsWithWinston\b(?:\s+as\s+(\w*))?)[\s\S]*?\}|\* as (\w+))\s*from ['"]@wizardsoftheweb\/logs-with-winston['"];$/gmi;
         const match: any = importRegExp.exec(contents);
         if (typeof match[2] === "string") {
             this.options.logger.silly(`Matched 'import * as ${match[2]} from "@wizardsoftheweb/logs-with-winston";'`);
@@ -106,7 +106,7 @@ whoamiWinston: string;
      */
     private determineLogsWithWinstonUsage(contents: string): string {
         /* tslint:disable:max-line-length */
-        const importRegExp = /^\s*import\s*(?:\{[\s\S]*?(?:LogsWithWinston(?:\s+as\s+(\w*))?)[\s\S]*?\}|\* as (\w+))\s*from ['"]@wizardsoftheweb\/logs-with-winston['"];$/gmi;
+        const importRegExp = /^\s*import\s*(?:\{[\s\S]*?(?:\bLogsWithWinston\b(?:\s+as\s+(\w*))?)[\s\S]*?\}|\* as (\w+))\s*from ['"]@wizardsoftheweb\/logs-with-winston['"];$/gmi;
         const match: any = importRegExp.exec(contents);
         if (typeof match[2] === "string") {
             this.options.logger.silly(`Matched 'import * as ${match[2]} from "@wizardsoftheweb/logs-with-winston";'`);
@@ -172,7 +172,7 @@ whoamiWinston: string;
         while (match = declarationRegExp.exec(contents)) {
             output = output.replace(
                 match[0],
-                (match[1] || this.options.decorator + this.options.eol)
+                (match[1] || `@${logsWithWinston}()${this.options.eol}`)
                 + this.appendImplements(match, iLogsWithWinston)
                 + members,
             )
