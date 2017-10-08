@@ -20,7 +20,7 @@ const writeFileSync = sinon.stub();
 const WinstonImportValidator = proxyquire("../src/lib/WinstonImportValidator", {}).WinstonImportValidator;
 
 describe("WinstonImportValidator", (): void => {
-    let checkWinstonImportStub: sinon.SinonStub;
+    let findOrCreateWinstonImportStub: sinon.SinonStub;
     let winstonImportValidator: any;
 
     const dummyContents = "qqq";
@@ -28,14 +28,14 @@ describe("WinstonImportValidator", (): void => {
     const indent = InheritsCliDecoratorOptions.DEFAULT_INDENT;
 
     beforeEach((): void => {
-        checkWinstonImportStub = sinon.stub(WinstonImportValidator.prototype as any, "checkWinstonImport");
+        findOrCreateWinstonImportStub = sinon.stub(WinstonImportValidator.prototype as any, "findOrCreateWinstonImport");
         winstonImportValidator = new WinstonImportValidator(dummyContents, {} as any);
     });
 
     describe("constructor", (): void => {
         it("should check the given contents", (): void => {
-            checkWinstonImportStub.should.have.been.calledOnce;
-            checkWinstonImportStub.should.have.been.calledWithExactly(dummyContents);
+            findOrCreateWinstonImportStub.should.have.been.calledOnce;
+            findOrCreateWinstonImportStub.should.have.been.calledWithExactly(dummyContents);
         });
     });
 
@@ -74,14 +74,14 @@ ${indent}transports,${EOL}\
         });
     });
 
-    describe("checkWinstonImport", (): void => {
+    describe("findOrCreateWinstonImport", (): void => {
         let findOrInsertLoggerInstanceImportStub: sinon.SinonStub;
         let createWinstonImportStub: sinon.SinonStub;
 
         const defaultReplacedImports = "qqq";
 
         beforeEach((): void => {
-            checkWinstonImportStub.restore();
+            findOrCreateWinstonImportStub.restore();
             findOrInsertLoggerInstanceImportStub = sinon.stub(
                 winstonImportValidator as any,
                 "findOrInsertLoggerInstanceImport",
@@ -92,7 +92,7 @@ ${indent}transports,${EOL}\
 
         it("should create an import when one is not found", (): void => {
             const contents = "file contents;";
-            (winstonImportValidator as any).checkWinstonImport(contents);
+            (winstonImportValidator as any).findOrCreateWinstonImport(contents);
             findOrInsertLoggerInstanceImportStub.should.not.have.been.called;
             createWinstonImportStub.should.have.been.calledOnce;
             createWinstonImportStub.should.have.been.calledWithExactly(contents);
@@ -100,7 +100,7 @@ ${indent}transports,${EOL}\
 
         it("should do nothing when a glob import is found", (): void => {
             const contents = `import * as winston from "winston";${EOL}file contents;`;
-            const output = (winstonImportValidator as any).checkWinstonImport(contents);
+            const output = (winstonImportValidator as any).findOrCreateWinstonImport(contents);
             findOrInsertLoggerInstanceImportStub.should.not.have.been.called;
             createWinstonImportStub.should.not.have.been.called;
             output.should.equal(contents);
@@ -115,7 +115,7 @@ ${indent}Logger,${EOL}\
 ${indent}LoggerInstance,${EOL}\
 } from "winston";${EOL}\
 file contents;`;
-            const output = (winstonImportValidator as any).checkWinstonImport(contents);
+            const output = (winstonImportValidator as any).findOrCreateWinstonImport(contents);
             findOrInsertLoggerInstanceImportStub.should.have.been.calledOnce;
             findOrInsertLoggerInstanceImportStub.should.have.been.calledWithExactly(imports);
             createWinstonImportStub.should.not.have.been.called;
@@ -124,6 +124,6 @@ file contents;`;
     });
 
     afterEach((): void => {
-        checkWinstonImportStub.restore();
+        findOrCreateWinstonImportStub.restore();
     });
 });
