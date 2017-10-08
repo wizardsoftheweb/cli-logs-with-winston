@@ -33,6 +33,29 @@ describe("DecoratorImplementor", (): void => {
         });
     });
 
+    describe("determineWinstonUsage", (): void => {
+        it("should find '* as winston'", (): void => {
+            const loggerInstance = (decoratorImplementor as any).determineWinstonUsage(
+                "import * as winston from 'winston';",
+            );
+            loggerInstance.should.equal("winston.LoggerInstance");
+        });
+
+        it("should find '{ LoggerInstance as SomethingElse }'", (): void => {
+            const loggerInstance = (decoratorImplementor as any).determineWinstonUsage(
+                "import { LoggerInstance as SomethingElse } from 'winston';",
+            );
+            loggerInstance.should.equal("SomethingElse");
+        });
+
+        it("should assume LoggerInstance otherwise", (): void => {
+            const loggerInstance = (decoratorImplementor as any).determineWinstonUsage(
+                "import { LoggerInstance } from 'winston';",
+            );
+            loggerInstance.should.equal("LoggerInstance");
+        });
+    });
+
     afterEach((): void => {
         decorateStub.restore();
     });

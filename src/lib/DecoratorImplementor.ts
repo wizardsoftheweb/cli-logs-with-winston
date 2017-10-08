@@ -37,7 +37,7 @@ export class DecoratorImplementor extends InheritsCliDecoratorOptions {
      */
     private determineWinstonUsage(contents: string): string {
         /* tslint:disable-next-line:max-line-length */
-        const importRegExp = /^\s*import\s*(?:\{[\s\S]*?(?:LoggerInstance(?:\s+as\s+(\w*))?)[\s\S]*?\}|\* as (\w+))\s*from "winston";$/gmi;
+        const importRegExp = /^\s*import\s*(?:\{[\s\S]*?(?:LoggerInstance(?:\s+as\s+(\w*))?)[\s\S]*?\}|\* as (\w+))\s*from ['"]winston['"];$/gmi;
         const match: any = importRegExp.exec(contents);
         if (typeof match[2] === "string") {
             this.options.logger.silly(`Matched 'import * as ${match[2]} from "winston";'`);
