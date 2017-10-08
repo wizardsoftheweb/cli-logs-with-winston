@@ -48,40 +48,14 @@ describe("Decorating vanilla classes", (): void => {
         });
 
         it("should lint without error", (): Bluebird<void> => {
-            return new Bluebird((resolve, reject) => {
-                return shelljs.exec(
-                    `${tsLint} -c ./tslint.json -p ./tsconfig.json --type-check`,
-                    { silent: true },
-                    (code: number, stdout: string, stderror: string) => {
-                        const result = stdout.trim();
-                        if (result.length > 0 || code !== 0) {
-                            return reject(result);
-                        } else {
-                            return resolve(result);
-                        }
-                    },
-                );
-            })
+            return lint()
                 .then((input: string): void => {
                     input.should.have.lengthOf(0);
                 });
         }).timeout(10000);
 
         it("should compile without error", (): Bluebird<void> => {
-            return new Bluebird((resolve, reject) => {
-                return shelljs.exec(
-                    `${tsc} --p ./tsconfig.json`,
-                    { silent: true },
-                    (code: number, stdout: string, stderror: string) => {
-                        const result = stdout.trim();
-                        if (result.length > 0 || code !== 0) {
-                            return reject(result);
-                        } else {
-                            return resolve(result);
-                        }
-                    },
-                );
-            })
+            return compile()
                 .then((input: string): void => {
                     input.should.have.lengthOf(0);
                 });
@@ -105,5 +79,40 @@ describe("Decorating vanilla classes", (): void => {
 
     function dumpDist(): void {
         shelljs.rm("-rf", path.join(tmpDir, "dist"));
+    }
+
+    function lint(): Bluebird<any> {
+        return new Bluebird((resolve, reject) => {
+            return shelljs.exec(
+                `${tsLint} -c ./tslint.json -p ./tsconfig.json --type-check`,
+                // { silent: true },
+                (code: number, stdout: string, stderror: string) => {
+                    const result = stdout.trim();
+                    if (result.length > 0 || code !== 0) {
+                        console.log(result);
+                        return reject(result);
+                    } else {
+                        return resolve(result);
+                    }
+                },
+            );
+        });
+    }
+
+    function compile(): Bluebird<any> {
+        return new Bluebird((resolve, reject) => {
+            return shelljs.exec(
+                `${tsc} --p ./tsconfig.json`,
+                { silent: true },
+                (code: number, stdout: string, stderror: string) => {
+                    const result = stdout.trim();
+                    if (result.length > 0 || code !== 0) {
+                        return reject(result);
+                    } else {
+                        return resolve(result);
+                    }
+                },
+            );
+        });
     }
 });
